@@ -1,8 +1,10 @@
 package com.example.android.rhoe_app_1;
 
         import android.content.Intent;
+        import android.support.annotation.NonNull;
         import android.support.v7.app.AppCompatActivity;
         import android.os.Bundle;
+        import android.util.Log;
         import android.view.View;
         import android.widget.Button;
         import android.widget.EditText;
@@ -12,6 +14,10 @@ package com.example.android.rhoe_app_1;
         import com.example.android.app_v12.R;
         import com.example.android.rhoe_app_1.FirebaseUsers.RetrieveUserInfoFirebase;
         import com.example.android.rhoe_app_1.FirebaseUsers.UserInfoFirebase;
+        import com.google.android.gms.tasks.OnCompleteListener;
+        import com.google.android.gms.tasks.Task;
+        import com.google.firebase.auth.AuthCredential;
+        import com.google.firebase.auth.EmailAuthProvider;
         import com.google.firebase.auth.FirebaseAuth;
         import com.google.firebase.auth.FirebaseUser;
         import com.google.firebase.database.DataSnapshot;
@@ -36,7 +42,7 @@ public class EditUserActivity extends AppCompatActivity {
 
     private FirebaseAuth firebaseAuth;
     private DatabaseReference databaseReference;
-    private String userID;
+    private String userID, P1, P2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,7 +51,7 @@ public class EditUserActivity extends AppCompatActivity {
 
         firebaseAuth = FirebaseAuth.getInstance();
         FirebaseDatabase database = FirebaseDatabase.getInstance();
-        FirebaseUser user =firebaseAuth.getCurrentUser();
+        final FirebaseUser user =firebaseAuth.getCurrentUser();
         userID = user.getUid();
         databaseReference = FirebaseDatabase.getInstance().getReference("Users");
         databaseReference.addValueEventListener(new ValueEventListener() {
@@ -66,6 +72,9 @@ public class EditUserActivity extends AppCompatActivity {
         SignatureNumEdit = (EditText) findViewById(R.id.etSignatureNumEdit);
         MunicipalityEdit = (TextView) findViewById(R.id.tvMunicipalityEdit);
         MIDEdit = (TextView) findViewById(R.id.tvMIDEdit);
+
+        SignatureNumEdit.setEnabled(false);
+        SignatureNumEdit.setHint("Κωδικός Υπογραφής (Μη διαθέσιμο)");
 
         SaveChangesEdit = (Button) findViewById(R.id.btnSaveChangesEdit);
         CancelEdit = (Button) findViewById(R.id.btnCancelEdit);
@@ -89,10 +98,31 @@ public class EditUserActivity extends AppCompatActivity {
         DeleteUserEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(EditUserActivity.this, DashboardActivity.class);
-                startActivity(intent);
+                AuthCredential credential = EmailAuthProvider
+                        .getCredential("user@example.com", "password1234");
+
+                // Prompt the user to re-provide their sign-in credentials
+                user.reauthenticate(credential)
+                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                user.delete()
+                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                if (task.isSuccessful()) {
+                                                    Log.d(TAG, "User account deleted.");
+                                                }
+                                                Intent intent = new Intent(EditUserActivity.this, LoginActivity.class);
+                                                startActivity(intent);
+                                            }
+                                        });
+                            }
+                        });
             }
         });
+
+
     }
 
     private void showData (DataSnapshot dataSnapshot) {
@@ -104,6 +134,8 @@ public class EditUserActivity extends AppCompatActivity {
             RUInfo.setMunicipality(dataSnapshot.child(userID).getValue(RetrieveUserInfoFirebase.class).getMunicipality());
             RUInfo.setSignatureNum(dataSnapshot.child(userID).getValue(RetrieveUserInfoFirebase.class).getSignatureNum());
             RUInfo.setType(dataSnapshot.child(userID).getValue(RetrieveUserInfoFirebase.class).getType());
+            RUInfo.setMACAddress(dataSnapshot.child(userID).getValue(RetrieveUserInfoFirebase.class).getType());
+            RUInfo.setPrinterFriendlyName(dataSnapshot.child(userID).getValue(RetrieveUserInfoFirebase.class).getType());
 
             TypeEdit.setText(RUInfo.getType());
             FnameEdit.setText(RUInfo.getFname());
@@ -111,6 +143,8 @@ public class EditUserActivity extends AppCompatActivity {
             SignatureNumEdit.setText(RUInfo.getSignatureNum());
             MunicipalityEdit.setText(RUInfo.getMunicipality());
             MIDEdit.setText(RUInfo.getMID());
+            P1 = RUInfo.getMACAddress();
+            P2 = RUInfo.getPrinterFriendlyName();
         }
     }
 
@@ -131,20 +165,20 @@ public class EditUserActivity extends AppCompatActivity {
                 (newEntry5.length() != 0) &&
                 (newEntry6.length() != 0)) {
 
-            UserInfoFirebase userInformationFirebase = new UserInfoFirebase(newEntry1, newEntry2, newEntry3, newEntry4, newEntry5, newEntry6);
+            UserInfoFirebase userInformationFirebase = new UserInfoFirebase(newEntry1, newEntry2, newEntry3, newEntry4, newEntry5, newEntry6, P1, P2);
 
             FirebaseUser user =firebaseAuth.getCurrentUser();
 
             databaseReference.child(user.getUid()).setValue(userInformationFirebase);
 
-            Toast.makeText(this, "Changes Saved", Toast.LENGTH_LONG).show();
+            Toast.makeText(EditUserActivity.this, "Changes Saved", Toast.LENGTH_LONG).show();
             finish();
 
-            Intent intent = new Intent(this, LoginActivity.class);
+            Intent intent = new Intent(EditUserActivity.this, LoginActivity.class);
             startActivity(intent);
 
         } else {
-            Toast.makeText(this, "You must complete all fields", Toast.LENGTH_LONG).show();
+            Toast.makeText(EditUserActivity.this, "You must complete all fields", Toast.LENGTH_LONG).show();
         }
 
 

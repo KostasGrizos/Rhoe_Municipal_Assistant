@@ -6,18 +6,20 @@ package com.example.android.rhoe_app_1.FirebaseUsers;
 
 public class UserInfoFirebase {
 
-    public String Type, Fname, Lname, SignatureNum, Municipality, MID;
+    public String Type, Fname, Lname, SignatureNum, Municipality, MID, MACAddress, PrinterFriendlyName;
 
     public UserInfoFirebase(){
 
     }
 
-    public UserInfoFirebase(String type, String fname, String lname, String signatureNum, String municipality, String MID) {
+    public UserInfoFirebase(String type, String fname, String lname, String signatureNum, String municipality, String MID, String MACAddress, String printerFriendlyName) {
         this.Type = type;
         this.Fname = fname;
         this.Lname = lname;
         this.SignatureNum = signatureNum;
         this.Municipality = municipality;
         this.MID = MID;
+        this.MACAddress = MACAddress;
+        this.PrinterFriendlyName = printerFriendlyName;
     }
 }

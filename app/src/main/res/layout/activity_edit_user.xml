@@ -82,7 +82,7 @@
             style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="0.8"
             android:backgroundTint="@color/colorAccent1"
             android:text="ΑΚΥΡΩΣΗ"
             tools:layout_editor_absoluteX="209dp"
@@ -93,10 +93,9 @@
             style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="1.2"
             android:backgroundTint="@color/colorAccent"
             android:text="ΑΠΟΘΗΚΕΥΣΗ ΑΛΛΑΓΩΝ"
-            android:textAllCaps="false"
             tools:layout_editor_absoluteX="297dp"
             tools:layout_editor_absoluteY="62dp" />
     </LinearLayout>
@@ -140,7 +139,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="48dp"
+        android:layout_marginTop="32dp"
         android:text="Type"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvEdit1" />

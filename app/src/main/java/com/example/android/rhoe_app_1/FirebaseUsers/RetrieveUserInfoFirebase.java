@@ -5,9 +5,9 @@ package com.example.android.rhoe_app_1.FirebaseUsers;
  */
 
 public class RetrieveUserInfoFirebase {
-    private String Type, Fname, Lname, SignatureNum, Municipality, MID;
+    private String Type, Fname, Lname, SignatureNum, Municipality, MID, MACAddress, PrinterFriendlyName;
 
-    public RetrieveUserInfoFirebase () {
+    public RetrieveUserInfoFirebase() {
 
     }
 
@@ -58,4 +58,21 @@ public class RetrieveUserInfoFirebase {
     public void setMID(String MID) {
         this.MID = MID;
     }
+
+    public String getMACAddress() {
+        return MACAddress;
+    }
+
+    public void setMACAddress(String MACAddress) {
+        this.MACAddress = MACAddress;
+    }
+
+    public String getPrinterFriendlyName() {
+        return PrinterFriendlyName;
+    }
+
+    public void setPrinterFriendlyName(String printerFriendlyName) {
+        PrinterFriendlyName = printerFriendlyName;
+    }
 }
+

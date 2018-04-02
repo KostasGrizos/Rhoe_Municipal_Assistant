@@ -7,6 +7,19 @@
     android:layout_height="match_parent">
 
 
+    <TextView
+        android:id="@+id/tvConnectivityStatusDash"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/holo_red_dark"
+        android:padding="8dp"
+        android:text="Εκτυπωτής: Μη Συνδεδεμένος"
+        android:textAlignment="center"
+        android:textColor="@android:color/background_light"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -60,7 +73,7 @@
                 android:layout_marginBottom="8dp"
                 android:layout_marginEnd="8dp"
                 android:layout_marginStart="8dp"
-                android:textColor="@color/colorPrimary"
+                android:textColor="@color/colorPrimaryDark"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent" />
@@ -137,7 +150,7 @@
                 app:srcCompat="@mipmap/server" />
 
             <ImageButton
-                android:id="@+id/imageButton3"
+                android:id="@+id/btnAnalytics"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
@@ -184,19 +197,6 @@
                 android:scaleType="fitCenter"
                 app:srcCompat="@mipmap/settings" />
         </LinearLayout>
-
-        <TextView
-            android:id="@+id/tvConnectivityStatusDash"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@android:color/holo_red_dark"
-            android:padding="8dp"
-            android:text="Status: Not Connected"
-            android:textAlignment="center"
-            android:textColor="@android:color/background_light"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
 
     </LinearLayout>
 

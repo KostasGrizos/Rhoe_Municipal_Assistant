@@ -33,6 +33,8 @@ import com.zebra.sdk.printer.ZebraPrinterLanguageUnknownException;
 public class DashboardActivity extends AppCompatActivity {
 
     private ImageButton LogoutButton;
+    private ImageButton FineLogButton;
+    private ImageButton AnalyticsButton;
     private ImageButton ViewUsersButton;
     private ImageButton NewFineButton;
     private ImageButton SettingsButton;
@@ -68,6 +70,8 @@ public class DashboardActivity extends AppCompatActivity {
         ConnectivityStatusDashTextView = (TextView)findViewById(R.id.tvConnectivityStatusDash);
 
         LogoutButton = (ImageButton)findViewById(R.id.btnLogout);
+        FineLogButton = (ImageButton)findViewById(R.id.btnFineLog);
+        AnalyticsButton = (ImageButton)findViewById(R.id.btnAnalytics);
         ViewUsersButton = (ImageButton)findViewById(R.id.btnViewUsers);
         NewFineButton = (ImageButton)findViewById(R.id.btnNewFine);
         SettingsButton = (ImageButton)findViewById(R.id.btnSettings);
@@ -96,6 +100,23 @@ public class DashboardActivity extends AppCompatActivity {
             }
         });
 
+        FineLogButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(DashboardActivity.this, FineListActivity.class);
+                startActivity(intent);
+
+            }
+        });
+
+        AnalyticsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Intent intent = new Intent(DashboardActivity.this, FineCompleteActivity.class);
+                //startActivity(intent);
+            }
+        });
+
         ViewUsersButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -108,19 +129,10 @@ public class DashboardActivity extends AppCompatActivity {
         NewFineButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Bundle con = new Bundle();
-                con.putBoolean("Condition", true);
-                Bundle con1 = new Bundle();
-                con1.putBoolean("Condition1", true);
-                Bundle con2 = new Bundle();
-                con2.putBoolean("Condition1", true);
-
-
-                Intent intent = new Intent(DashboardActivity.this, FineActivity.class);
-                intent.putExtras(con);
-                intent.putExtras(con1);
-                intent.putExtras(con2);
-
+                Bundle conOCR = new Bundle();
+                conOCR.putBoolean("ConditionOCR", true);
+                Intent intent = new Intent(DashboardActivity.this, FineCompleteActivity.class);
+                intent.putExtras(conOCR);
                 startActivity(intent);
             }
         });
@@ -135,6 +147,7 @@ public class DashboardActivity extends AppCompatActivity {
             }
         });
     }
+
 
     private void showData (DataSnapshot dataSnapshot) {
         for (DataSnapshot ds : dataSnapshot.getChildren()){

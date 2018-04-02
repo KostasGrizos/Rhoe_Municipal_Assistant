@@ -6,15 +6,16 @@
     android:layout_height="match_parent"
     tools:context="com.example.android.rhoe_app_1.BluetoothConnectActivity">
 
-    <Button
-        android:id="@+id/btnBluetoothFind"
-        style="@style/Widget.AppCompat.Button.Colored"
+    <TextView
+        android:id="@+id/tvConnectivityStatus"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:text="Εντοπισμός Zebra Printer"
+        android:layout_weight="0.05"
+        android:background="@android:color/holo_red_dark"
+        android:padding="2dp"
+        android:text="Εκτυπωτής: Μη Συνδεδεμένος"
+        android:textAlignment="center"
+        android:textColor="@android:color/background_light"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -29,7 +30,7 @@
         android:orientation="vertical"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnBluetoothFind">
+        app:layout_constraintTop_toBottomOf="@+id/textView">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -89,19 +90,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/linearLayout2" />
 
-    <TextView
-        android:id="@+id/tvConnectivityStatus"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:background="@android:color/holo_red_dark"
-        android:padding="8dp"
-        android:text="Status: Not Connected"
-        android:textAlignment="center"
-        android:textColor="@android:color/background_light"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
     <Button
         android:id="@+id/btnPrintTest"
         style="@style/Widget.AppCompat.Button.Colored"
@@ -139,7 +127,21 @@
         android:layout_marginStart="8dp"
         android:backgroundTint="@color/colorAccent1"
         android:text="ΑΠΟΘΗΚΕΥΣΗ ΣΥΝΔΕΣΗΣ"
-        app:layout_constraintBottom_toTopOf="@+id/tvConnectivityStatus"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="ΣΥΝΔΕΣΗ ΕΚΤΥΠΩΤΗ  ZEBRA"
+        android:textAlignment="center"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvConnectivityStatus" />
 </android.support.constraint.ConstraintLayout>

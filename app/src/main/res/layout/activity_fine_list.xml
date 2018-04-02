@@ -4,11 +4,35 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <TextView
+        android:id="@+id/tvConnectivityStatusList"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.05"
+        android:background="@android:color/holo_red_dark"
+        android:padding="2dp"
+        android:text="Εκτυπωτής: Μη Συνδεδεμένος"
+        android:textAlignment="center"
+        android:textColor="@android:color/background_light" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.20"
+        android:orientation="horizontal">
+
+        <SearchView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+
     <ListView
         android:id="@+id/lvFineList"
         style="@style/Widget.AppCompat.ListView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="0dp"
+        android:layout_weight="0.75">
 
     </ListView>
+
 </LinearLayout>

@@ -1,36 +1,56 @@
 package com.example.android.rhoe_app_1;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.content.DialogInterface;
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.net.Uri;
+import android.icu.text.SimpleDateFormat;
+import android.icu.util.Calendar;
+import android.icu.util.TimeZone;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.text.Editable;
 import android.text.Html;
-import android.text.Spanned;
-import android.util.Base64;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.ListView;
+import android.widget.ImageButton;
 import android.widget.Spinner;
+import android.widget.Switch;
+import android.widget.TableLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.android.app_v12.R;
+import com.example.android.rhoe_app_1.FirebaseFine.FineAInfoFirebase;
+import com.example.android.rhoe_app_1.FirebaseFine.FineBInfoFirebase;
+import com.example.android.rhoe_app_1.FirebaseFine.FineBasicInfoFirebase;
+import com.example.android.rhoe_app_1.FirebaseFine.FineCInfoFirebase;
+import com.example.android.rhoe_app_1.FirebaseFine.FineDInfoFirebase;
 import com.example.android.rhoe_app_1.FirebaseFine.RetrieveFineInfoFirebase;
 import com.example.android.rhoe_app_1.FirebaseUsers.RetrieveUserInfoFirebase;
 import com.example.android.rhoe_app_1.Zebra.DemoSleeper;
 import com.example.android.rhoe_app_1.Zebra.SettingsHelper;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -38,65 +58,113 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FileDownloadTask;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 import com.zebra.sdk.comm.BluetoothConnection;
 import com.zebra.sdk.comm.Connection;
 import com.zebra.sdk.comm.ConnectionException;
-import com.zebra.sdk.graphics.internal.ZebraImageAndroid;
 import com.zebra.sdk.printer.PrinterLanguage;
 import com.zebra.sdk.printer.ZebraPrinter;
 import com.zebra.sdk.printer.ZebraPrinterFactory;
 import com.zebra.sdk.printer.ZebraPrinterLanguageUnknownException;
 
-import java.util.ArrayList;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.Locale;
 import java.util.Objects;
+import java.util.concurrent.locks.Condition;
 
+public class FineCompleteActivity extends AppCompatActivity implements LocationListener {
 
-public class FineListActivity extends AppCompatActivity {
-
-    private static final String TAG = "FineListActivity";
+    //Database
+    DatabaseReference databaseReference;
+    DatabaseReference userDatabaseReference;
+    DatabaseReference tempDatabaseReference;
+    private FirebaseAuth firebaseAuth;
+    private String userID, P1, P2, LocalMAC, MunicipalityIndex, OfficerName, MunicipalityShort, MID, MIDBlanks;
 
     //Zebra Printer
     private ZebraPrinter printer;
     private Connection printerConnection;
     private TextView ConnectivityStatusFineTextView;
 
-    FirebaseDatabase mFirebaseDatabase;
-    DatabaseReference mRef, databaseReference;
-    DatabaseReference mURef, userDatabaseReference;
-    DatabaseReference mRefClick;
-    FirebaseAuth mAuth;
-    FirebaseStorage storage = FirebaseStorage.getInstance();
-    String userID;
-    String MunicipalityIndex, MID, P1, P2, OfficerName, SignatureImage;
-    String selectedKey;
-    String DateSelected, TimeSelected, PlateSelected, AddressSelected, MunicipalityShort, MIDBlanks;
-    Bitmap image;
-    byte[] data;
+    //Basic Information
+    private EditText PlateEditText, PlateCountryEditText, ColorEditText, DateEditText, DayEditText, TimeEditText, AddressEditText, FineAmountEditText, FinePointsEditText;
+    private Spinner TypeEditText;
+    private AutoCompleteTextView FineTypeAutoCompl, BrandAutoCompl;
+    double latF=0, lonF=0;
+    private String[] FineType, FineAmount, FinePoints, CarBrand;
 
-    ListView mListView;
-    ArrayList<Spanned> list = new ArrayList<>();
-    ArrayList<String> listKey = new ArrayList<>();
-    ArrayAdapter adapter;
+    //Date-Time
+    android.icu.util.Calendar calendar;
+    SimpleDateFormat simpleDateFormat, simpleDateFirebaseFormat, simpleTimeFormat, simpleDayFormat;
+    String Date, DateFirebase, Time, Day;
 
-    private String PlateReprint, PlateCountryReprint, ColorReprint, DateReprint, DayReprint, TimeReprint, AddressReprint, FineAmountReprint, FinePointsReprint, TypeReprint, FineTypeReprint, BrandReprint;
-    private String A1 = "", A2 = "", A3 = "", A4 = "", A5 = "", A6 = "", B1 = "", B2 = "", B3 = "", B4 = "", B5 = "", B6 = "", C1 = "", C2 = "", C3 = "", C4 = "", C5 = "", C6 = "", C7 = "", C8 = "", D1 = "", D2 = "", D3 = "", D4 = "", D5 = "";
+    //Location
+    LocationManager locationManager;
+    String provider;
+    EditText LocationEditText;
+    final int MY_PERMISSION_REQUEST_CODE = 7171;
+    double lat, lng;
+
+
+    //Buttons
+    ImageButton FineInfoButton, FineClearButton, OCRButton, TimeStampButton;
+    Button FineSaveButton, FineConfirmButton;
+
+    //Extra Information
+    private Switch switchA, switchB, switchC, switchD;
+    private TableLayout tableA, tableB, tableC, tableD;
+    private EditText A1, A2, A3, A4, A5, A6, B1, B2, B3, B4, B5, B6, C2, C3, C4, C5, C6, C7, C8, D1, D2, D3, D4, D5;
+    private Spinner C1;
+
+    //Tables
+    private String[] FineBasic = new String[10];
+    private String[] A = new String[6], B = new String[6], C = new String[6], D = new String[6];
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onResume() {
+        super.onResume();
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            return;
+        }
+        locationManager.requestLocationUpdates(provider, 20000, 1, this);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSION_REQUEST_CODE:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                    getLocation();
+                break;
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_fine_list);
+        setContentView(R.layout.activity_fine_complete);
 
-        ConnectivityStatusFineTextView = (TextView) findViewById(R.id.tvConnectivityStatusList);
+        //OCR-Extra Bundles
+        Bundle conOCR = this.getIntent().getExtras();
+        final boolean ConditionOCR = conOCR.getBoolean("ConditionOCR");
+        final Bundle OCRResultB = this.getIntent().getExtras();
+        assert OCRResultB != null;
+        final String OCRResult= OCRResultB.getString("OCR");
+        final Bundle OCRResultCountryB = this.getIntent().getExtras();
+        assert OCRResultCountryB != null;
+        final String OCRResultCountry= OCRResultCountryB.getString("OCRC");
 
+        A = new String[]{"", "", "", "", "", ""};
+        B = new String[]{"", "", "", "", "", ""};
+        C = new String[]{"", "", "", "", "", "", "", ""};
+        D = new String[]{"", "", "", "", ""};
+
+        //Initial Printer Connection
         new Thread(new Runnable() {
             public void run() {
                 Looper.prepare();
@@ -106,144 +174,21 @@ public class FineListActivity extends AppCompatActivity {
             }
         }).start();
 
-        mListView = (ListView) findViewById((R.id.lvFineList));
-        adapter = new ArrayAdapter<>(this, android.R.layout.simple_expandable_list_item_1, list);
-
-        mListView.setAdapter(adapter);
-
-        mAuth = FirebaseAuth.getInstance();
-        FirebaseUser user = mAuth.getCurrentUser();
+        //Firebase Connection
+        firebaseAuth = FirebaseAuth.getInstance();
+        if(firebaseAuth.getCurrentUser() ==null){
+            //profile activity
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
+        }
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        FirebaseUser user =firebaseAuth.getCurrentUser();
         userID = user.getUid();
-        mFirebaseDatabase = FirebaseDatabase.getInstance();
         userDatabaseReference = FirebaseDatabase.getInstance().getReference("Users");
-        populateListView();
-
-        StorageReference storageRef = storage.getReferenceFromUrl("gs://testproject-328af.appspot.com/");
-        final StorageReference SignatureImagesRef = storageRef.child("Signatures/" + userID + ".jpg");
-
-        StorageReference mobileRef = storageRef.child("images/" + userID + ".jpg");
-        final long ONE_MEGABYTE = 1024 * 1024;
-        SignatureImagesRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new
-        OnSuccessListener<byte[]>() {
-            @Override
-            public void onSuccess(byte[] bytes) {
-                // Data for "images/island.jpg" is returns, use this as needed
-                data = bytes;
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception exception) {
-                // Handle any errors
-            }
-        });
-
-
-
-
-
-        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                selectedKey = listKey.get(position);
-                mRefClick = databaseReference.child(selectedKey);
-                mRefClick.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        showDataFromFine(dataSnapshot);
-                        showFineDetails(FineListActivity.this);
-                    }
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                    }
-                });
-
-            }
-        });
-
-
-    }
-
-    public void showFineDetails(FineListActivity view) {
-        final AlertDialog myAlert = new AlertDialog.Builder(this).create();
-        myAlert.setTitle("Βεβαίωση Παράβασης Κ.Ο.Κ.");
-        myAlert.setMessage(Html.fromHtml("<b>Ημερομηνία/Ώρα</b> <br>" + DateReprint + " " +TimeReprint + "<br>" +
-                "<b>Αρ. Κυκλοφορίας</b> <br>" + PlateReprint + "<br>" +
-                "<b>Διεύθυνση</b> <br>" + AddressReprint + "<br>"));
-        myAlert.setButton2("ΔΙΑΓΡΑΦΗ", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                final AlertDialog myAlert1 = new AlertDialog.Builder(FineListActivity.this).create();
-                myAlert1.setTitle("Είστε σίγουροι ότι θέλετε να διαγράψετε την βεβαίωση");
-                myAlert1.setButton2("ΝΑΙ", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        mRefClick.setValue(null);
-                        myAlert1.dismiss();
-                        finish();
-                        Intent intent = new Intent(FineListActivity.this,FineListActivity.class);
-                        startActivity(intent);
-                    }
-                });
-                myAlert1.setButton("ΑΚΥΡΩΣΗ", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        myAlert1.dismiss();
-                    }
-                });
-                myAlert1.show();
-
-            }
-        });
-        myAlert.setButton("ΕΠΑΝΕΚΤΥΠΩΣΗ", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                new Thread(new Runnable() {
-                    public void run() {Looper.prepare();
-                        doConnectionTest();
-                        Looper.loop();
-                        Looper.myLooper().quit();
-                        new Thread(new Runnable() {
-                            public void run() {
-                                Looper.prepare();
-                                doConnection();
-                                Looper.loop();
-                                Looper.myLooper().quit();
-                            }
-                        }).start();
-                    }
-                }).start();
-            }
-        });
-        myAlert.show();
-    }
-
-    private void populateListView() {
         userDatabaseReference.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot UdataSnapshot) {
-                showDataFromUser(UdataSnapshot);
-
-                databaseReference.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        Iterator<DataSnapshot> items = dataSnapshot.getChildren().iterator();
-                        while (items.hasNext()) {
-                            DataSnapshot item = items.next();
-                            String RealUID = item.child("UserID").getValue().toString();
-                            if (Objects.equals(RealUID, userID)) {
-                                list.add(0, Html.fromHtml("<b>"+ item.child("Date").getValue().toString() + " " + item.child("Time").getValue().toString() + "</b> <br>" +
-                                        item.child("CarPlate").getValue().toString()));
-                                listKey.add(0, item.getKey());
-                                adapter.notifyDataSetChanged();
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                showData(dataSnapshot);
             }
 
             @Override
@@ -251,10 +196,597 @@ public class FineListActivity extends AppCompatActivity {
 
             }
         });
+        tempDatabaseReference= FirebaseDatabase.getInstance().getReference("TempFine").child("Temp " + userID);
+        if(!ConditionOCR) {
+            tempDatabaseReference.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    showDataFromOCR(dataSnapshot);
+                    if (OCRResult != null) {
+                        PlateEditText.setText(OCRResult);
+                    }
+                    if (OCRResultCountry != null) {
+                        PlateCountryEditText.setText(OCRResultCountry);
+                    }
+
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
+
+
+        //Basic Information
+            //A-Printer
+        ConnectivityStatusFineTextView =(TextView) findViewById(R.id.tvConnectivityStatusFine);
+
+            //B-Fine Selection
+        FineInfoButton = (ImageButton) findViewById(R.id.btnFineInfo);
+        FineClearButton = (ImageButton) findViewById(R.id.btnFineClear);
+        FineTypeAutoCompl = (AutoCompleteTextView) findViewById(R.id.acViolation);
+        FineType = getResources().getStringArray(R.array.autoComplViolations);
+        ArrayAdapter<String> adapterType = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, FineType);
+        FineTypeAutoCompl.setAdapter(adapterType);
+
+        FineAmountEditText = (EditText) findViewById(R.id.etFineAmmount);
+        FineAmount = getResources().getStringArray(R.array.autoComplViolationPrice);
+        ArrayAdapter<String> adapterAmount = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, FineAmount);
+
+        FinePointsEditText = (EditText) findViewById(R.id.etPoints);
+        FinePoints = getResources().getStringArray(R.array.autoComplViolationPoints);
+        ArrayAdapter<String> adapterPoints = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, FinePoints);
+
+        FineTypeAutoCompl.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String FineA;
+                String FineP;
+                if (Arrays.asList(FineType).indexOf(FineTypeAutoCompl.getText().toString()) >= 0) {
+                    FineA = FineAmount[Arrays.asList(FineType).indexOf(FineTypeAutoCompl.getText().toString())];
+                    FineP = FinePoints[Arrays.asList(FineType).indexOf(FineTypeAutoCompl.getText().toString())];
+
+                    for (int i = 0; i < FineA.length(); i++) {
+                        if ((Character.isDigit(FineA.charAt(i))) || (FineA.subSequence(i, i + 1).equals("."))) {
+                            FineAmountEditText.setText(FineAmount[Arrays.asList(FineType).indexOf(FineTypeAutoCompl.getText().toString())]);
+                        } else {
+                            FineAmountEditText.setText("");
+                            FineAmountEditText.setHint("βλ.(i)");
+                            break;
+                        }
+                    }
+                    if (FineP.length() > 1) {
+                        FinePointsEditText.setHint("βλ.(i)");
+                    } else {
+                        FinePointsEditText.setText(FinePoints[Arrays.asList(FineType).indexOf(FineTypeAutoCompl.getText().toString())]);
+                    }
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+        FineInfoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (FineTypeAutoCompl.length()>0) {
+                    showFineDetails(FineCompleteActivity.this);
+                }
+            }
+        });
+
+        FineClearButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FineTypeAutoCompl.setText("");
+                FineAmountEditText.setText("");
+                FinePointsEditText.setText("");
+
+            }
+        });
+
+            //C-Car Selection
+        OCRButton = (ImageButton) findViewById(R.id.btnOCR);
+        PlateEditText = (EditText)findViewById(R.id.etLiscencePlate);
+        PlateCountryEditText = (EditText)findViewById(R.id.etCarCountry);
+        TypeEditText = (Spinner)findViewById(R.id.spCarType);
+        ColorEditText = (EditText)findViewById(R.id.etColor);
+        BrandAutoCompl = (AutoCompleteTextView) findViewById(R.id.acBrand);
+        CarBrand = getResources().getStringArray(R.array.autoComplBrands);
+        ArrayAdapter<String> adapterBrand = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, CarBrand);
+        BrandAutoCompl.setAdapter(adapterBrand);
+
+        OCRButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                saveAndPrint("0", "0");
+                Intent intent = new Intent(FineCompleteActivity.this, OCRActivity.class);
+                startActivity(intent);
+            }
+        });
+
+
+            //D-Location/Date Selection
+        TimeStampButton = (ImageButton) findViewById(R.id.btnTimestamp);
+        LocationEditText = (EditText) findViewById(R.id.etAddress);
+        DateEditText = (EditText)findViewById(R.id.etDate);
+        DayEditText = (EditText)findViewById(R.id.etDay);
+        TimeEditText = (EditText)findViewById(R.id.etTime);
+        AddressEditText = (EditText)findViewById(R.id.etAddress);
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this, new String[]{
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+            }, MY_PERMISSION_REQUEST_CODE);
+
+        } else {
+            getLocation();
+        }
+
+        TimeStampButton.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("DefaultLocale")
+            @Override
+            public void onClick(View view) {
+                getTimestampFull();
+                getLocationButton();
+            }
+        });
+
+        //Extra Information
+        tableA = (TableLayout) this.findViewById(R.id.tlA);
+        switchA = (Switch) this.findViewById(R.id.swA);
+        tableB = (TableLayout) this.findViewById(R.id.tlB);
+        switchB = (Switch) this.findViewById(R.id.swB);
+        tableC = (TableLayout) this.findViewById(R.id.tlC);
+        switchC = (Switch) this.findViewById(R.id.swC);
+        tableD = (TableLayout) this.findViewById(R.id.tlD);
+        switchD = (Switch) this.findViewById(R.id.swD);
+
+        switchA.setChecked(false);
+        tableA.setVisibility(TableLayout.GONE);
+        switchA.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                checkSection(switchA.isChecked(),tableA);
+            }
+        });
+
+        switchB.setChecked(false);
+        tableB.setVisibility(TableLayout.GONE);
+        switchB.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                checkSection(switchB.isChecked(),tableB);
+            }
+        });
+
+        switchC.setChecked(false);
+        tableC.setVisibility(TableLayout.GONE);
+        switchC.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                checkSection(switchC.isChecked(),tableC);
+            }
+        });
+
+        switchD.setChecked(false);
+        tableD.setVisibility(TableLayout.GONE);
+        switchD.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                checkSection(switchD.isChecked(),tableD);
+            }
+        });
+
+        A1 = (EditText) findViewById(R.id.etA1);
+        A2 = (EditText) findViewById(R.id.etA2);
+        A3 = (EditText) findViewById(R.id.etA3);
+        A4 = (EditText) findViewById(R.id.etA4);
+        A5 = (EditText) findViewById(R.id.etA5);
+        A6 = (EditText) findViewById(R.id.etA6);
+
+        B1 = (EditText) findViewById(R.id.etB1);
+        B2 = (EditText) findViewById(R.id.etB2);
+        B3 = (EditText) findViewById(R.id.etB3);
+        B4 = (EditText) findViewById(R.id.etB4);
+        B5 = (EditText) findViewById(R.id.etB5);
+        B6 = (EditText) findViewById(R.id.etB6);
+
+        C1 = (Spinner) findViewById(R.id.spC1);
+        C2 = (EditText) findViewById(R.id.etC2);
+        C3 = (EditText) findViewById(R.id.etC3);
+        C4 = (EditText) findViewById(R.id.etC4);
+        C5 = (EditText) findViewById(R.id.etC5);
+        C6 = (EditText) findViewById(R.id.etC6);
+        C7 = (EditText) findViewById(R.id.etC7);
+        C8 = (EditText) findViewById(R.id.etC8);
+
+        D1 = (EditText) findViewById(R.id.etD1);
+        D2 = (EditText) findViewById(R.id.etD2);
+        D3 = (EditText) findViewById(R.id.etD3);
+        D4 = (EditText) findViewById(R.id.etD4);
+        D5 = (EditText) findViewById(R.id.etD5);
+
+        //Final Buttons
+        FineSaveButton =(Button)findViewById(R.id.btnFineSave);
+        FineConfirmButton =(Button)findViewById(R.id.btnFineConfirm);
+
+        FineSaveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                saveAndPrint("0", "1");
+            }
+        });
+
+        FineConfirmButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                saveAndPrint("1", "1");
+            }
+        });
     }
 
-    //Printer
+    private void toastMessage(String message){
+        Toast.makeText(this,message, Toast.LENGTH_SHORT).show();
+    }
 
+    private void showData (DataSnapshot dataSnapshot) {
+        for (DataSnapshot ds : dataSnapshot.getChildren()){
+            RetrieveUserInfoFirebase RUInfo = new RetrieveUserInfoFirebase();
+            RUInfo.setFname(dataSnapshot.child(userID).getValue(RetrieveUserInfoFirebase.class).getFname());
+            RUInfo.setLname(dataSnapshot.child(userID).getValue(RetrieveUserInfoFirebase.class).getLname());
+            RUInfo.setMID(dataSnapshot.child(userID).getValue(RetrieveUserInfoFirebase.class).getMID());
+            RUInfo.setMunicipality(dataSnapshot.child(userID).getValue(RetrieveUserInfoFirebase.class).getMunicipality());
+            RUInfo.setSignatureNum(dataSnapshot.child(userID).getValue(RetrieveUserInfoFirebase.class).getSignatureNum());
+            RUInfo.setType(dataSnapshot.child(userID).getValue(RetrieveUserInfoFirebase.class).getType());
+            RUInfo.setMACAddress(dataSnapshot.child(userID).getValue(RetrieveUserInfoFirebase.class).getMACAddress());
+            RUInfo.setPrinterFriendlyName(dataSnapshot.child(userID).getValue(RetrieveUserInfoFirebase.class).getPrinterFriendlyName());
+
+            MunicipalityIndex = RUInfo.getMunicipality();
+            MID = RUInfo.getMID();
+            databaseReference = FirebaseDatabase.getInstance().getReference("Fines").child(MID);
+            P1 = RUInfo.getMACAddress();
+            P2 = RUInfo.getPrinterFriendlyName();
+            OfficerName = RUInfo.getLname() + " " + RUInfo.getFname();
+            MunicipalityShort = MunicipalityIndex.subSequence(6, MunicipalityIndex.length()).toString();
+
+            MIDBlanks = RUInfo.getMID().subSequence(0, 1).toString() + "  "  +
+                    RUInfo.getMID().subSequence(1, 2).toString() + "  "  +
+                    RUInfo.getMID().subSequence(2, 3).toString() + "  "  +
+                    RUInfo.getMID().subSequence(3, 4).toString();
+
+        }
+    }
+
+    public void showFineDetails(FineCompleteActivity view) {
+        AlertDialog.Builder myAlert = new AlertDialog.Builder(this);
+        myAlert.setMessage(Html.fromHtml("<b>Περιγραφή Παράβασης</b> <br>" + FineTypeAutoCompl.getText().toString() + "<br>" +
+                "<b>Χρηματικό πρόστιμο (€)</b> <br>" + FineAmount[Arrays.asList(FineType).indexOf(FineTypeAutoCompl.getText().toString())] + "<br>" +
+                "<b>Βαθμοί Σ.Ε.Σ.Ο.</b> <br>" + FinePoints[Arrays.asList(FineType).indexOf(FineTypeAutoCompl.getText().toString())] + "<br>" +
+                "<b>Αφαίρεση ΣΚ</b> <br>" + "TBA")).create();
+        myAlert.show();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    private void getTimestampFull() {
+        calendar = android.icu.util.Calendar.getInstance();
+        simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT+2"));
+        Date = simpleDateFormat.format(calendar.getTime());
+
+        simpleDateFirebaseFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss:SSSZ");
+        simpleDateFirebaseFormat.setTimeZone(TimeZone.getTimeZone("GMT+2"));
+        DateFirebase = simpleDateFirebaseFormat.format(calendar.getTime());
+
+        simpleTimeFormat = new SimpleDateFormat("HH:mm");
+        simpleTimeFormat.setTimeZone(TimeZone.getTimeZone("GMT+2"));
+        Time = simpleTimeFormat.format(calendar.getTime());
+
+        Locale locale = new Locale("el-GR");
+        simpleDayFormat = new SimpleDateFormat("EEEE", locale);
+        simpleDayFormat.setTimeZone(TimeZone.getTimeZone("GMT+2"));
+        Day = simpleDayFormat.format(calendar.getTime());
+
+        DateEditText.setText(Date);
+        TimeEditText.setText(Time);
+        DayEditText.setText(Day);
+    }
+
+    private void getLocationButton() {
+        if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            return;
+        }
+        Location myLocation = locationManager.getLastKnownLocation(provider);
+        lat = myLocation.getLatitude();
+        lng = myLocation.getLongitude();
+        new GetAddress().execute(String.format("%.4f,%.4f",lat,lng));
+    }
+
+    private void checkSection(boolean condition, TableLayout table){
+        if(condition){
+            table.setVisibility(TableLayout.VISIBLE);
+        }
+        else {
+            table.setVisibility(TableLayout.GONE);
+        }
+    }
+
+    private boolean extraInfoChecker(int length, String[] table) {
+        boolean b = true;
+        for (int i = 0; i < length; i++) {
+            if (!table[i].equals("")) {
+                b = false;
+                break;
+            }
+        }
+        return b;
+    }
+
+    public void saveAndPrint(String Print, String allComplete) {
+        FineBasic = new String[]{PlateEditText.getText().toString(),
+                TypeEditText.getSelectedItem().toString(),
+                BrandAutoCompl.getText().toString(),
+                ColorEditText.getText().toString(),
+                DateEditText.getText().toString(),
+                FineAmountEditText.getText().toString(),
+                DayEditText.getText().toString(),
+                TimeEditText.getText().toString(),
+                AddressEditText.getText().toString(),
+                FineTypeAutoCompl.getText().toString(),
+                PlateCountryEditText.getText().toString(),
+                FinePointsEditText.getText().toString()
+        };
+        A = new String[]{A1.getText().toString(),
+                A2.getText().toString(),
+                A3.getText().toString(),
+                A4.getText().toString(),
+                A5.getText().toString(),
+                A6.getText().toString()};
+        boolean conA = extraInfoChecker(6, A);
+        B = new String[]{B1.getText().toString(),
+                B2.getText().toString(),
+                B3.getText().toString(),
+                B4.getText().toString(),
+                B5.getText().toString(),
+                B6.getText().toString()};
+        boolean conB = extraInfoChecker(6, B);
+        C = new String[]{C1.getSelectedItem().toString(),
+                C2.getText().toString(),
+                C3.getText().toString(),
+                C4.getText().toString(),
+                C5.getText().toString(),
+                C6.getText().toString(),
+                C7.getText().toString(),
+                C8.getText().toString()};
+        boolean conC = extraInfoChecker(8, C);
+        D = new String[]{D1.getText().toString(),
+                D2.getText().toString(),
+                D3.getText().toString(),
+                D4.getText().toString(),
+                D5.getText().toString()};
+        boolean conD = extraInfoChecker(5, D);
+
+
+        if (allComplete.equals("1")) {
+            if ((FineBasic[0].length() != 0) &&
+                    (FineBasic[1].length() != 0) &&
+                    (FineBasic[2].length() != 0) &&
+                    (FineBasic[3].length() != 0) &&
+                    (FineBasic[4].length() != 0) &&
+                    (FineBasic[5].length() != 0) &&
+                    (FineBasic[6].length() != 0) &&
+                    (FineBasic[7].length() != 0) &&
+                    (FineBasic[8].length() != 0) &&
+                    (FineBasic[9].length() != 0) &&
+                    (FineBasic[10].length() != 0) &&
+                    (FineBasic[11].length() != 0) &&
+                    (latF != 0) &&
+                    (lonF != 0) &&
+                    DateFirebase != null)
+            {
+
+                FirebaseUser userFirebase =firebaseAuth.getCurrentUser();
+
+                FineBasicInfoFirebase fineBasicInfoFirebase = new FineBasicInfoFirebase(FineBasic[0],
+                        FineBasic[1],
+                        FineBasic[2],
+                        FineBasic[3],
+                        FineBasic[4],
+                        FineBasic[5],
+                        FineBasic[6],
+                        FineBasic[7],
+                        FineBasic[8],
+                        FineBasic[9],
+                        userFirebase.getUid(),
+                        FineBasic[10],
+                        FineBasic[11],
+                        "No",
+                        latF,
+                        lonF);
+
+                databaseReference.child(DateFirebase).setValue(fineBasicInfoFirebase);
+
+                if (!conA) {
+                    FineAInfoFirebase fineAInfoFirebase = new FineAInfoFirebase(A[0], A[1], A[2], A[3], A[4], A[5]);
+                    databaseReference.child(DateFirebase).child("Fine A").setValue(fineAInfoFirebase);
+                }
+                if (!conB) {
+                    FineBInfoFirebase fineBInfoFirebase = new FineBInfoFirebase(B[0], B[1], B[2], B[3], B[4], B[5]);
+                    databaseReference.child(DateFirebase).child("Fine A").setValue(fineBInfoFirebase);
+                }
+                if (!conC) {
+                    FineCInfoFirebase fineCInfoFirebase = new FineCInfoFirebase(C[0], C[1], C[2], C[3], C[4], C[5], C[6], C[7]);
+                    databaseReference.child(DateFirebase).child("Fine C").setValue(fineCInfoFirebase);
+                }
+                if (!conD) {
+                    FineDInfoFirebase fineDInfoFirebase = new FineDInfoFirebase(D[0], D[1], D[2], D[3], D[4]);
+                    databaseReference.child(DateFirebase).child("Fine D").setValue(fineDInfoFirebase);
+                }
+
+                //Printer
+                if (Print.equals("1")){
+                    new Thread(new Runnable() {
+                        public void run() {
+                            Looper.prepare();
+                            doConnectionTest();
+                            Looper.loop();
+                            Looper.myLooper().quit();
+                        }
+                    }).start();
+
+                }
+
+                tempDatabaseReference.setValue(null);
+                Intent intent = new Intent(FineCompleteActivity.this, DashboardActivity.class);
+                startActivity(intent);
+
+            } else {
+                toastMessage("You must complete all the fields!");
+            }
+        } else {FirebaseUser userFirebase =firebaseAuth.getCurrentUser();
+
+            FineBasicInfoFirebase fineBasicInfoFirebase = new FineBasicInfoFirebase(BlankField(FineBasic[0]),
+                    BlankField(FineBasic[1]),
+                    BlankField(FineBasic[2]),
+                    BlankField(FineBasic[3]),
+                    BlankField(FineBasic[4]),
+                    BlankField(FineBasic[5]),
+                    BlankField(FineBasic[6]),
+                    BlankField(FineBasic[7]),
+                    BlankField(FineBasic[8]),
+                    BlankField(FineBasic[9]),
+                    BlankField(userFirebase.getUid()),
+                    BlankField(FineBasic[10]),
+                    BlankField(FineBasic[11]),
+                    "No",
+                    BlankFieldL(latF),
+                    BlankFieldL(lonF));
+
+            tempDatabaseReference.setValue(fineBasicInfoFirebase);
+
+            if (!conA) {
+                FineAInfoFirebase fineAInfoFirebase = new FineAInfoFirebase(A[0], A[1], A[2], A[3], A[4], A[5]);
+                tempDatabaseReference.child("Fine A").setValue(fineAInfoFirebase);
+            }
+            if (!conB) {
+                FineBInfoFirebase fineBInfoFirebase = new FineBInfoFirebase(B[0], B[1], B[2], B[3], B[4], B[5]);
+                tempDatabaseReference.child("Fine A").setValue(fineBInfoFirebase);
+            }
+            if (!conC) {
+                FineCInfoFirebase fineCInfoFirebase = new FineCInfoFirebase(C[0], C[1], C[2], C[3], C[4], C[5], C[6], C[7]);
+                tempDatabaseReference.child("Fine C").setValue(fineCInfoFirebase);
+            }
+            if (!conD) {
+                FineDInfoFirebase fineDInfoFirebase = new FineDInfoFirebase(D[0], D[1], D[2], D[3], D[4]);
+                tempDatabaseReference.child("Fine D").setValue(fineDInfoFirebase);
+            }
+
+            //Printer
+            if (Print.equals("1")){
+                new Thread(new Runnable() {
+                    public void run() {
+                        Looper.prepare();
+                        doConnectionTest();
+                        Looper.loop();
+                        Looper.myLooper().quit();
+                    }
+                }).start();
+
+            }
+
+            Intent intent = new Intent(FineCompleteActivity.this, DashboardActivity.class);
+            startActivity(intent);
+        }
+    }
+
+    //Location Processing
+    private void getLocation() {
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        provider = locationManager.getBestProvider(new Criteria(), false);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        final Location location = locationManager.getLastKnownLocation(provider);
+        if(location == null)
+            Log.e("ERROR","Location is null");
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        lat = location.getLatitude();
+        lng = location.getLongitude();
+
+        new GetAddress().execute(String.format("%.4f,%.4f",lat,lng));
+    }
+
+    @Override
+    public void onStatusChanged(String s, int i, Bundle bundle) {}
+
+    @Override
+    public void onProviderEnabled(String s) {}
+
+    @Override
+    public void onProviderDisabled(String s) {}
+
+    private class GetAddress extends AsyncTask<String,Void,String> {
+        ProgressDialog dialog = new ProgressDialog(FineCompleteActivity.this);
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            dialog.setMessage("Please wait...");
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.show();
+        }
+
+        @Override
+        protected String doInBackground(String... strings) {
+            try{
+                double lat = Double.parseDouble(strings[0].split(",")[0]);
+                double lng = Double.parseDouble(strings[0].split(",")[1]);
+                String response;
+                HttpDataHandler http = new HttpDataHandler();
+                String url = String.format("https://maps.googleapis.com/maps/api/geocode/json?latlng=%.4f,%.4f&sensor=false&language=el",lat,lng);
+                response = http.GetHTTPData(url);
+                return response;
+            }
+            catch (Exception ex) {}
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            try{
+                JSONObject jsonObject = new JSONObject(s);
+
+                String address = ((JSONArray)jsonObject.get("results")).getJSONObject(0).get("formatted_address").toString();
+                LocationEditText.setText(address);
+                latF = lat;
+                lonF = lng;
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            if(dialog.isShowing())
+                dialog.dismiss();
+        }
+    }
+
+    //Printer Proccessing
     private void doConnection() {
         printer = connect();
     }
@@ -429,49 +961,49 @@ public class FineListActivity extends AppCompatActivity {
                         "^FO0,992^GFA,13824,13824,00072,:Z64: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:AC38\n" +
                         "^FO128,1536^GFA,01920,01920,00020,:Z64:eJztkM9qgzAcxxOUeClRT8tYur6CsEuEgSs77DVa+gJKH6CWgr153mnPYlB69BlS+gKDXQoDnf1jiYl7gA2/JCAfPvnmZwAYMuTXWBCAGQBwJ7HAiE8MlBIjMAZh4xUSY40nGiZ5aAKRO4uycTHOXkdXZudJIL5FVRJxwBdmQr6l0YfHCzLNR+3pQ8qaxUuy36Qti5CzMF1e0Mi4ecuELVI/LsnTBt+8LVma7rqgD0anL/Z5yiZtH/LmiTPPwil6fmw9FOwrNvsSK+uI7fo63x14I2GUUfhutkwKlr699iV7WPNAGoMSY1rz/wr8NDKKUIcZR1vUKe4wi9KQKx7GjOVJl5kmuec7zfPXJVY8x+3xGFf6zvcm6ny1Nh8QK+0/zlHZy6m0Us422650T43oYUP+en4A7zpdqw==:D0E2\n" +
                         "^FO416,1536^GFA,01536,01536,00016,:Z64:eJztkbFuwjAQhs9g0aOK6I0ZUBXBC2T0aKoMfQyepHGAIQNCjDzOITH0MYJ4gY4dezGIuFFbZUOV+AdLn37/Pts/wF3/T9av+srOr70uPo0VZ5oeeKwOJPvMYmSOa8TktHhMWTYoBJsREWhd++BK5BWm6MpBOhdbkbaaaAiv3lfFLuJ1nAzde8/Yiy95BfbHPBQY13kqVt43+43h8/y4nk8zxTZ7y+V+Vf7R8T+iFusWDzqeczs9O9OvOLlyAi/yPQ3P7RIxYDtTdKnZy01Bemh8kfQQ+BPYRn/keb+Unn6fP3r67FcBnw9pPSLI+wby6jsHavNdt9EXwJM7+Q==:28EA\n" +
-                        "^CI34^FT388,1771^A0I,20,19^FH^FD\n" + GreekConverter(C8) + "^FS\n" +
-                        "^FT160,1802^A0I,20,19^FH^FD\n" + GreekConverter(C7) + "^FS\n" +
-                        "^FT487,1803^A0I,20,19^FH^FD\n" + GreekConverter(C6) + "^FS\n" +
-                        "^FT368,1833^A0I,20,19^FH^FD\n" + GreekConverter(C5) + "^FS\n" +
-                        "^FT421,1864^A0I,20,19^FH^FD\n" + GreekConverter(C4) + "^FS\n" +
-                        "^FT438,1921^A0I,20,19^FH^FD\n" + GreekConverter(C2) + "^FS\n" +
-                        "^FT114,1949^A0I,20,19^FH^FD\n" + CarOwnerNo(C1) + "^FS\n" +
-                        "^FT462,1893^A0I,20,19^FH^FD\n" + GreekConverter(C3) + "^FS\n" +
-                        "^FT251,1949^A0I,20,19^FH^FD\n" + CarOwnerYes(C1) + "^FS\n" +
-                        "^FT134,2011^A0I,20,19^FH^FD\n" + GreekConverter(TypeReprint) + "^FS\n" +
-                        "^FT120,1981^A0I,20,19^FH^FD\n" + GreekConverter(ColorReprint) + "^FS\n" +
-                        "^FT465,1983^A0I,20,19^FH^FD\n" + GreekConverter(BrandReprint) + "^FS\n" +
-                        "^FT126,1639^A0I,20,19^FH^FD\n" + GreekConverter(D5) + "^FS\n" +
-                        "^FT127,1670^A0I,20,19^FH^FD\n" + GreekConverter(D3) + "^FS\n" +
-                        "^FT387,1516^A0I,28,28^FH^FD\n" + GreekConverter(DateReprint) + "^FS\n" +
-                        "^FT308,1321^A0I,20,19^FH^FD\n" + GreekConverter(AddressReprint) + "^FS\n" +
-                        "^FT456,1320^A0I,20,19^FH^FD\n" + GreekConverter(TimeReprint) + "^FS\n" +
-                        "^FT121,1344^A0I,20,19^FH^FD\n" + GreekConverter(DayReprint) + "^FS\n" +
-                        "^FT362,1346^A0I,20,19^FH^FD\n" + GreekConverter(DateReprint) + "^FS\n" +
+                        "^CI34^FT388,1771^A0I,20,19^FH^FD\n" + GreekConverter(C[7]) + "^FS\n" +
+                        "^FT160,1802^A0I,20,19^FH^FD\n" + GreekConverter(C[6]) + "^FS\n" +
+                        "^FT487,1803^A0I,20,19^FH^FD\n" + GreekConverter(C[5]) + "^FS\n" +
+                        "^FT368,1833^A0I,20,19^FH^FD\n" + GreekConverter(C[4]) + "^FS\n" +
+                        "^FT421,1864^A0I,20,19^FH^FD\n" + GreekConverter(C[3]) + "^FS\n" +
+                        "^FT438,1921^A0I,20,19^FH^FD\n" + GreekConverter(C[1]) + "^FS\n" +
+                        "^FT114,1949^A0I,20,19^FH^FD\n" + CarOwnerNo(C[0]) + "^FS\n" +
+                        "^FT462,1893^A0I,20,19^FH^FD\n" + GreekConverter(C[2]) + "^FS\n" +
+                        "^FT251,1949^A0I,20,19^FH^FD\n" + CarOwnerYes(C[0]) + "^FS\n" +
+                        "^FT134,2011^A0I,20,19^FH^FD\n" + GreekConverter(FineBasic[1]) + "^FS\n" +
+                        "^FT120,1981^A0I,20,19^FH^FD\n" + GreekConverter(FineBasic[3]) + "^FS\n" +
+                        "^FT465,1983^A0I,20,19^FH^FD\n" + GreekConverter(FineBasic[2]) + "^FS\n" +
+                        "^FT126,1639^A0I,20,19^FH^FD\n" + GreekConverter(D[4]) + "^FS\n" +
+                        "^FT127,1670^A0I,20,19^FH^FD\n" + GreekConverter(D[2]) + "^FS\n" +
+                        "^FT387,1516^A0I,28,28^FH^FD\n" + GreekConverter(FineBasic[4]) + "^FS\n" +
+                        "^FT308,1321^A0I,20,19^FH^FD\n" + GreekConverter(FineBasic[8]) + "^FS\n" +
+                        "^FT456,1320^A0I,20,19^FH^FD\n" + GreekConverter(FineBasic[7]) + "^FS\n" +
+                        "^FT121,1344^A0I,20,19^FH^FD\n" + GreekConverter(FineBasic[6]) + "^FS\n" +
+                        "^FT362,1346^A0I,20,19^FH^FD\n" + GreekConverter(FineBasic[4]) + "^FS\n" +
                         "^FT394,956^A0I,20,19^FH^FD\n" + /*Πόντοι*/ "^FS\n" +
-                        "^FT525,1220^A0I,20,19^FH^FD\n" + GreekConverter(FineSplitter(145,194, FineTypeReprint)) + "^FS\n" +
-                        "^FT527,1244^A0I,20,19^FH^FD\n" + GreekConverter(FineSplitter(95,144, FineTypeReprint)) + "^FS\n" +
-                        "^FT527,1271^A0I,20,19^FH^FD\n" + GreekConverter(FineSplitter(45,94, FineTypeReprint)) + "^FS\n" +
-                        "^FT499,1294^A0I,20,19^FH^FD\n" + GreekConverter(FineSplitter(0,44, FineTypeReprint)) + "^FS\n" +
+                        "^FT525,1220^A0I,20,19^FH^FD\n" + GreekConverter(FineSplitter(145,194, FineBasic[9])) + "^FS\n" +
+                        "^FT527,1244^A0I,20,19^FH^FD\n" + GreekConverter(FineSplitter(95,144, FineBasic[9])) + "^FS\n" +
+                        "^FT527,1271^A0I,20,19^FH^FD\n" + GreekConverter(FineSplitter(45,94, FineBasic[9])) + "^FS\n" +
+                        "^FT499,1294^A0I,20,19^FH^FD\n" + GreekConverter(FineSplitter(0,44, FineBasic[9])) + "^FS\n" +
                         "^FT485,1372^A0I,20,19^FH^FD\n" + GreekConverter(OfficerName) + "^FS\n" +
                         "^FT150,1576^A0I,25,24^FH^FD\n" + /*Πληρωμή*/ "^FS\n" +
-                        "^FT420,1576^A0I,25,24^FH^FD\n" + GreekConverter(FineAmountReprint + "€") + "^FS\n" +
-                        "^FT447,1639^A0I,20,19^FH^FD\n" + GreekConverter(D4) + "^FS\n" +
-                        "^FT488,1670^A0I,20,19^FH^FD\n" + GreekConverter(D2) + "^FS\n" +
-                        "^FT414,1698^A0I,20,19^FH^FD\n" + GreekConverter(D1) + "^FS\n" +
-                        "^FT429,2010^A0I,20,19^FH^FD\n" + GreekConverter(PlateReprint) + "[" + GreekConverter(PlateCountryReprint) + "]" + "^FS\n" +
-                        "^FT471,2077^A0I,20,19^FH^FD\n" + GreekConverter(B6) + "^FS\n" +
-                        "^FT443,2106^A0I,20,19^FH^FD\n" + GreekConverter(B5) + "^FS\n" +
-                        "^FT385,2137^A0I,20,19^FH^FD\n" + GreekConverter(B4) + "^FS\n" +
-                        "^FT121,2166^A0I,20,19^FH^FD\n" + GreekConverter(B3) + "^FS\n" +
-                        "^FT485,2165^A0I,20,19^FH^FD\n" + GreekConverter(B2) + "^FS\n" +
-                        "^FT405,2196^A0I,20,19^FH^FD\n" + GreekConverter(B1) + "^FS\n" +
-                        "^FT422,2264^A0I,20,19^FH^FD\n" + GreekConverter(A6) + "^FS\n" +
-                        "^FT423,2295^A0I,20,19^FH^FD\n" + GreekConverter(A5) + "^FS\n" +
-                        "^FT403,2324^A0I,20,19^FH^FD\n" + GreekConverter(A4) + "^FS\n" +
-                        "^FT417,2354^A0I,20,19^FH^FD\n" + GreekConverter(A3) + "^FS\n" +
-                        "^FT456,2382^A0I,20,19^FH^FD\n" + GreekConverter(A2) + "^FS\n" +
-                        "^FT431,2415^A0I,20,19^FH^FD\n" + GreekConverter(A1) + "^FS\n" +
+                        "^FT420,1576^A0I,25,24^FH^FD\n" + GreekConverter(FineBasic[5] + "€") + "^FS\n" +
+                        "^FT447,1639^A0I,20,19^FH^FD\n" + GreekConverter(D[3]) + "^FS\n" +
+                        "^FT488,1670^A0I,20,19^FH^FD\n" + GreekConverter(D[1]) + "^FS\n" +
+                        "^FT414,1698^A0I,20,19^FH^FD\n" + GreekConverter(D[0]) + "^FS\n" +
+                        "^FT429,2010^A0I,20,19^FH^FD\n" + GreekConverter(FineBasic[0]) + "[" + GreekConverter(FineBasic[10]) + "]" + "^FS\n" +
+                        "^FT471,2077^A0I,20,19^FH^FD\n" + GreekConverter(B[5]) + "^FS\n" +
+                        "^FT443,2106^A0I,20,19^FH^FD\n" + GreekConverter(B[4]) + "^FS\n" +
+                        "^FT385,2137^A0I,20,19^FH^FD\n" + GreekConverter(B[3]) + "^FS\n" +
+                        "^FT121,2166^A0I,20,19^FH^FD\n" + GreekConverter(B[2]) + "^FS\n" +
+                        "^FT485,2165^A0I,20,19^FH^FD\n" + GreekConverter(B[1]) + "^FS\n" +
+                        "^FT405,2196^A0I,20,19^FH^FD\n" + GreekConverter(B[0]) + "^FS\n" +
+                        "^FT422,2264^A0I,20,19^FH^FD\n" + GreekConverter(A[5]) + "^FS\n" +
+                        "^FT423,2295^A0I,20,19^FH^FD\n" + GreekConverter(A[4]) + "^FS\n" +
+                        "^FT403,2324^A0I,20,19^FH^FD\n" + GreekConverter(A[3]) + "^FS\n" +
+                        "^FT417,2354^A0I,20,19^FH^FD\n" + GreekConverter(A[2]) + "^FS\n" +
+                        "^FT456,2382^A0I,20,19^FH^FD\n" + GreekConverter(A[1]) + "^FS\n" +
+                        "^FT431,2415^A0I,20,19^FH^FD\n" + GreekConverter(A[0]) + "^FS\n" +
                         "^FT325,2686^A0I,23,24^FH^FD\n" + GreekConverter(MunicipalityIndex.toUpperCase()) + "^FS\n" +
                         "^FT477,2560^A0I,23,24^FH^FD\n" + GreekConverter(MunicipalityShort) + "^FS\n" +
                         "^FT198,2562^A0I,23,24^FH^FD\n" + GreekConverter(MIDBlanks) + "^FS\n" +
@@ -551,8 +1083,6 @@ public class FineListActivity extends AppCompatActivity {
                         "^FO228,1944^GB27,27,1^FS\n" +
                         "^FO519,968^GB28,27,1^FS\n" +
                         "^FO519,1145^GB28,27,1^FS\n" +
-                        //Signature
-                        "^FO128,0^GFA,06912,06912,00036,:Z64:\n " + Base64String(SignatureImage) + "\n" +
                         "^PQ1,0,1,Y^XZ";
 
         String header = tmpHeader;
@@ -583,7 +1113,7 @@ public class FineListActivity extends AppCompatActivity {
                         "^LL0200\n" +
                         "^LS0\n" +
                         "^FT195,202^BQN,2,8\n" +
-                        "^FH^FDLA,\n" + MID + "/" + mRefClick.getKey() + "^FS\n" +
+                        "^FH^FDLA,\n" + MID + "/" + DateFirebase + "^FS\n" +
                         "^PQ1,0,1,Y^XZ";
 
 
@@ -703,36 +1233,24 @@ public class FineListActivity extends AppCompatActivity {
         }
     }
 
-    //Temporary Data
-    private void showDataFromUser (DataSnapshot dataSnapshot) {
-        for (DataSnapshot ds : dataSnapshot.getChildren()){
-            RetrieveUserInfoFirebase RUInfo = new RetrieveUserInfoFirebase();
-            RUInfo.setFname(dataSnapshot.child(userID).getValue(RetrieveUserInfoFirebase.class).getFname());
-            RUInfo.setLname(dataSnapshot.child(userID).getValue(RetrieveUserInfoFirebase.class).getLname());
-            RUInfo.setMID(dataSnapshot.child(userID).getValue(RetrieveUserInfoFirebase.class).getMID());
-            RUInfo.setMunicipality(dataSnapshot.child(userID).getValue(RetrieveUserInfoFirebase.class).getMunicipality());
-            RUInfo.setSignatureNum(dataSnapshot.child(userID).getValue(RetrieveUserInfoFirebase.class).getSignatureNum());
-            RUInfo.setType(dataSnapshot.child(userID).getValue(RetrieveUserInfoFirebase.class).getType());
-            RUInfo.setMACAddress(dataSnapshot.child(userID).getValue(RetrieveUserInfoFirebase.class).getMACAddress());
-            RUInfo.setPrinterFriendlyName(dataSnapshot.child(userID).getValue(RetrieveUserInfoFirebase.class).getPrinterFriendlyName());
-
-            MunicipalityIndex = RUInfo.getMunicipality();
-            MID = RUInfo.getMID();
-            databaseReference = FirebaseDatabase.getInstance().getReference("Fines").child(MID);
-            P1 = RUInfo.getMACAddress();
-            P2 = RUInfo.getPrinterFriendlyName();
-            OfficerName = RUInfo.getLname() + " " + RUInfo.getFname();
-            MunicipalityShort = MunicipalityIndex.subSequence(6, MunicipalityIndex.length()).toString();
-            SignatureImage = RUInfo.getSignatureNum();
-
-            MIDBlanks = RUInfo.getMID().subSequence(0, 1).toString() + "  "  +
-                    RUInfo.getMID().subSequence(1, 2).toString() + "  "  +
-                    RUInfo.getMID().subSequence(2, 3).toString() + "  "  +
-                    RUInfo.getMID().subSequence(3, 4).toString();
-
+    //BlankFields
+    private String BlankField(String item) {
+        if (item == null){
+            return "";
+        } else {
+            return item;
         }
     }
-    private void showDataFromFine (DataSnapshot dataSnapshot) {
+    private double BlankFieldL(double item) {
+        if (item == 0){
+            return 0;
+        } else {
+            return item;
+        }
+    }
+
+    //Temporary Data
+    private void showDataFromOCR (DataSnapshot dataSnapshot) {
         for (DataSnapshot ds : dataSnapshot.getChildren()){
             RetrieveFineInfoFirebase RInfo = new RetrieveFineInfoFirebase();
             RInfo.setAddress(dataSnapshot.getValue(RetrieveFineInfoFirebase.class).getAddress());
@@ -745,24 +1263,26 @@ public class FineListActivity extends AppCompatActivity {
             RInfo.setFineAmount(dataSnapshot.getValue(RetrieveFineInfoFirebase.class).getFineAmount());
             RInfo.setFineType(dataSnapshot.getValue(RetrieveFineInfoFirebase.class).getFineType());
             RInfo.setTime(dataSnapshot.getValue(RetrieveFineInfoFirebase.class).getTime());
-            RInfo.setUserID(dataSnapshot.getValue(RetrieveFineInfoFirebase.class).getUserID());
+            //RInfo.setUserID(dataSnapshot.getValue(RetrieveFineInfoFirebase.class).getUserID());
             RInfo.setCarCountry(dataSnapshot.getValue(RetrieveFineInfoFirebase.class).getCarCountry());
             RInfo.setFinePoints(dataSnapshot.getValue(RetrieveFineInfoFirebase.class).getFinePoints());
             //RInfo.setPaid(dataSnapshot.getValue(RetrieveFineInfoFirebase.class).getPaid());
             RInfo.setLat(dataSnapshot.getValue(RetrieveFineInfoFirebase.class).getLat());
             RInfo.setLon(dataSnapshot.getValue(RetrieveFineInfoFirebase.class).getLon());
-            AddressReprint = RInfo.getAddress();
-            BrandReprint = RInfo.getCarBrand();
-            ColorReprint = RInfo.getCarColor();
-            PlateReprint = RInfo.getCarPlate();
-            TypeReprint = RInfo.getCarType();
-            DateReprint = RInfo.getDate();
-            DayReprint = RInfo.getDay();
-            FineAmountReprint = RInfo.getFineAmount();
-            FineTypeReprint = RInfo.getFineType();
-            TimeReprint = RInfo.getTime();
-            PlateCountryReprint = RInfo.getCarCountry();
-            FinePointsReprint = RInfo.getFinePoints();
+            AddressEditText.setText(RInfo.getAddress());
+            BrandAutoCompl.setText(RInfo.getCarBrand());
+            ColorEditText.setText(RInfo.getCarColor());
+            PlateEditText.setText(RInfo.getCarPlate());
+            TypeEditText.setSelection(selection(RInfo.getCarType()));
+            DateEditText.setText(RInfo.getDate());
+            DayEditText.setText(RInfo.getDay());
+            FineAmountEditText.setText(RInfo.getFineAmount());
+            FineTypeAutoCompl.setText(RInfo.getFineType());
+            TimeEditText.setText(RInfo.getTime());
+            PlateCountryEditText.setText(RInfo.getCarCountry());
+            FinePointsEditText.setText(RInfo.getFinePoints());
+            latF = RInfo.getLat();
+            lonF = RInfo.getLon();
 
             if (dataSnapshot.hasChild("Fine A")) {
                 RInfo.setA1(dataSnapshot.child("Fine A").getValue(RetrieveFineInfoFirebase.class).getA1());
@@ -771,12 +1291,12 @@ public class FineListActivity extends AppCompatActivity {
                 RInfo.setA4(dataSnapshot.child("Fine A").getValue(RetrieveFineInfoFirebase.class).getA4());
                 RInfo.setA5(dataSnapshot.child("Fine A").getValue(RetrieveFineInfoFirebase.class).getA5());
                 RInfo.setA6(dataSnapshot.child("Fine A").getValue(RetrieveFineInfoFirebase.class).getA6());
-                A1 = RInfo.getA1();
-                A2 = RInfo.getA2();
-                A3 = RInfo.getA3();
-                A4 = RInfo.getA4();
-                A5 = RInfo.getA5();
-                A6 = RInfo.getA6();
+                A1.setText(RInfo.getA1());
+                A2.setText(RInfo.getA2());
+                A3.setText(RInfo.getA3());
+                A4.setText(RInfo.getA4());
+                A5.setText(RInfo.getA5());
+                A6.setText(RInfo.getA6());
             }
             if (dataSnapshot.hasChild("Fine B")) {
                 RInfo.setB1(dataSnapshot.child("Fine B").getValue(RetrieveFineInfoFirebase.class).getB1());
@@ -785,12 +1305,12 @@ public class FineListActivity extends AppCompatActivity {
                 RInfo.setB4(dataSnapshot.child("Fine B").getValue(RetrieveFineInfoFirebase.class).getB4());
                 RInfo.setB5(dataSnapshot.child("Fine B").getValue(RetrieveFineInfoFirebase.class).getB5());
                 RInfo.setB6(dataSnapshot.child("Fine B").getValue(RetrieveFineInfoFirebase.class).getB6());
-                B1 = RInfo.getB1();
-                B2 = RInfo.getB2();
-                B3 = RInfo.getB3();
-                B4 = RInfo.getB4();
-                B5 = RInfo.getB5();
-                B6 = RInfo.getB6();
+                B1.setText(RInfo.getB1());
+                B2.setText(RInfo.getB2());
+                B3.setText(RInfo.getB3());
+                B4.setText(RInfo.getB4());
+                B5.setText(RInfo.getB5());
+                B6.setText(RInfo.getB6());
             }
             if (dataSnapshot.hasChild("Fine C")) {
                 RInfo.setC1(dataSnapshot.child("Fine C").getValue(RetrieveFineInfoFirebase.class).getC1());
@@ -801,14 +1321,14 @@ public class FineListActivity extends AppCompatActivity {
                 RInfo.setC6(dataSnapshot.child("Fine C").getValue(RetrieveFineInfoFirebase.class).getC6());
                 RInfo.setC7(dataSnapshot.child("Fine C").getValue(RetrieveFineInfoFirebase.class).getC7());
                 RInfo.setC8(dataSnapshot.child("Fine C").getValue(RetrieveFineInfoFirebase.class).getC8());
-                C1 = RInfo.getC1();
-                C2 = RInfo.getC2();
-                C3 = RInfo.getC3();
-                C4 = RInfo.getC4();
-                C5 = RInfo.getC5();
-                C6 = RInfo.getC6();
-                C7 = RInfo.getC7();
-                C8 = RInfo.getC8();
+                C1.setSelection(selection(RInfo.getC1()));
+                C2.setText(RInfo.getC2());
+                C3.setText(RInfo.getC3());
+                C4.setText(RInfo.getC4());
+                C5.setText(RInfo.getC5());
+                C6.setText(RInfo.getC6());
+                C7.setText(RInfo.getC7());
+                C8.setText(RInfo.getC8());
             }
             if (dataSnapshot.hasChild("Fine C")) {
                 RInfo.setD1(dataSnapshot.child("Fine D").getValue(RetrieveFineInfoFirebase.class).getD1());
@@ -816,33 +1336,22 @@ public class FineListActivity extends AppCompatActivity {
                 RInfo.setD3(dataSnapshot.child("Fine D").getValue(RetrieveFineInfoFirebase.class).getD3());
                 RInfo.setD4(dataSnapshot.child("Fine D").getValue(RetrieveFineInfoFirebase.class).getD4());
                 RInfo.setD5(dataSnapshot.child("Fine D").getValue(RetrieveFineInfoFirebase.class).getD5());
-                D1 = RInfo.getD1();
-                D2 = RInfo.getD2();
-                D3 = RInfo.getD3();
-                D4 = RInfo.getD4();
-                D5 = RInfo.getD5();
+                D1.setText(RInfo.getD1());
+                D2.setText(RInfo.getD2());
+                D3.setText(RInfo.getD3());
+                D4.setText(RInfo.getD4());
+                D5.setText(RInfo.getD5());
             }
         }
     }
-
-    public static Bitmap Base64Decode(String base64EncodedData) {
-        byte[] decodedString = Base64.decode(base64EncodedData, Base64.DEFAULT);
-        Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-        return decodedByte;
-    }
-    public String Base64String(String base64) {
-        String s = "";
-        Integer lastI = 0;
-        for (int i=0; i < base64.length()-2; i++) {
-            if (base64.subSequence(i,i+2).equals("\n")) {
-                lastI = i + 2;
-                s = s + base64.subSequence(lastI, i);
-            }
+    private Integer selection(String item) {
+        Integer i = 1;
+        if (item.equals("Ι.Χ.")){
+            i = 0;
         }
-        s = s + base64.subSequence(lastI, base64.length());
-        return s;
+        if (item.equals("ΟΧΙ")){
+            i = 2;
+        }
+        return i;
     }
-
 }
-
-

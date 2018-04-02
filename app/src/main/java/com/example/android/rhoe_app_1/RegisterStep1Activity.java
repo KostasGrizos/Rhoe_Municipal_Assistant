@@ -30,11 +30,19 @@ public class RegisterStep1Activity extends AppCompatActivity {
 
     private ProgressDialog progressDialog;
     private FirebaseAuth firebaseAuth;
+    private String MunicipalityText, MIDText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register_step_1);
+
+        final Bundle MunicipalityB= this.getIntent().getExtras();
+        assert MunicipalityB != null;
+        MunicipalityText= MunicipalityB.getString("Municipality");
+        final Bundle MIDB = this.getIntent().getExtras();
+        assert MIDB != null;
+        MIDText= MIDB.getString("MID");
 
         firebaseAuth = FirebaseAuth.getInstance();
         progressDialog = new ProgressDialog(this);
@@ -119,9 +127,14 @@ public class RegisterStep1Activity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         progressDialog.dismiss();
                         if (task.isSuccessful()) {
-                            //Start Dashboard Activity
+                            Bundle MunicipalityB = new Bundle();
+                            MunicipalityB.putString("Municipality", MunicipalityText);
+                            Bundle MIDB = new Bundle();
+                            MIDB.putString("MID", MIDText);
                             finish();
                             Intent intent = new Intent(getApplicationContext(), RegisterActivity.class);
+                            intent.putExtras(MunicipalityB);
+                            intent.putExtras(MIDB);
                             startActivity(intent);
                         }
                     }

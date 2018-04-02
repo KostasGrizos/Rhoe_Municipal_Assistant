@@ -41,13 +41,8 @@
             android:value="ocr" />
 
         <activity android:name="com.example.android.rhoe_app_1.DashboardActivity" />
-        <activity
-            android:name="com.example.android.rhoe_app_1.FineActivity"
-            android:label="@string/title_activity_fine"
-            android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name="com.example.android.rhoe_app_1.RegisterActivity" />
         <activity android:name="com.example.android.rhoe_app_1.FineAdvancedActivity" />
-        <activity android:name="com.example.android.rhoe_app_1.FineCommentsActivity" />
         <activity android:name="com.example.android.rhoe_app_1.FineListActivity" />
         <activity
             android:name="com.example.android.rhoe_app_1.FineEditActivity"
@@ -57,7 +52,9 @@
         <activity android:name="com.example.android.rhoe_app_1.BluetoothFindActivity" />
         <activity android:name="com.example.android.rhoe_app_1.Zebra.BluetoothDiscovery" />
         <activity android:name="com.example.android.rhoe_app_1.RegisterStep1Activity" />
-        <activity android:name="com.example.android.rhoe_app_1.EditUserActivity"></activity>
+        <activity android:name="com.example.android.rhoe_app_1.EditUserActivity" />
+        <activity android:name="com.example.android.rhoe_app_1.AnalyticsActivity" />
+        <activity android:name="com.example.android.rhoe_app_1.FineCompleteActivity"></activity>
     </application>
 
 </manifest>

@@ -47,6 +47,11 @@ dependencies {
     compile 'com.google.firebase:firebase-core:11.8.0'
     compile 'com.google.firebase:firebase-auth:11.8.0'
     compile 'com.google.firebase:firebase-database:11.8.0'
+    compile 'com.android.support:recyclerview-v7:25.3.1'
+    compile 'com.google.firebase:firebase-storage:11.8.0'
+
+    //Analytics
+    compile 'com.jjoe64:graphview:4.2.1'
 
     //PDF Libray
     compile 'com.github.barteksc:android-pdf-viewer:2.3.0'
