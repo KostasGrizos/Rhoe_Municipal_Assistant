@@ -95,8 +95,8 @@
             <ImageButton
                 android:id="@+id/btnLogout"
                 style="@android:style/Widget.DeviceDefault.ImageButton"
-                android:layout_width="60dp"
-                android:layout_height="40dp"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 android:backgroundTint="@android:color/transparent"
                 android:scaleType="fitCenter"
                 app:srcCompat="@mipmap/logout" />

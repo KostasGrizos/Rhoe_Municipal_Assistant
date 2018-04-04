@@ -53,35 +53,42 @@
 
                 <EditText
                     android:id="@+id/etLiscencePlate"
-                    android:layout_width="150dp"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
                     android:ems="10"
                     android:hint="Αρ. Κυκλοφορίας"
                     android:inputType="textCapCharacters"
                     android:singleLine="false"
+                    app:layout_constraintEnd_toStartOf="@+id/etCarCountry"
                     app:layout_constraintStart_toStartOf="@+id/acBrand"
                     app:layout_constraintTop_toBottomOf="@+id/tv1b" />
 
                 <AutoCompleteTextView
                     android:id="@+id/acBrand"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
                     android:layout_marginRight="8dp"
+                    android:layout_marginStart="8dp"
                     android:ems="10"
                     android:hint="Μάρκα"
                     android:inputType="textCapCharacters|textAutoComplete"
+                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/btnOCR"
                     app:layout_constraintTop_toBottomOf="@+id/etLiscencePlate" />
 
                 <EditText
                     android:id="@+id/etColor"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginRight="8dp"
                     android:ems="10"
                     android:hint="Χρώμα"
                     android:inputType="textCapCharacters|textAutoComplete"
                     app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintStart_toStartOf="@+id/acBrand"
                     app:layout_constraintTop_toBottomOf="@+id/acBrand" />
 
                 <Spinner
@@ -121,52 +128,52 @@
 
                 <EditText
                     android:id="@+id/etDay"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="45dp"
                     android:layout_marginEnd="8dp"
+                    android:layout_marginStart="8dp"
                     android:ems="10"
                     android:hint="Ημέρα"
                     android:inputType="textPersonName"
-                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/etTime"
+                    app:layout_constraintStart_toEndOf="@+id/btnTimestamp"
                     app:layout_constraintTop_toBottomOf="@+id/etDate" />
 
                 <EditText
                     android:id="@+id/etDate"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
                     android:layout_marginRight="8dp"
+                    android:layout_marginStart="8dp"
                     android:ems="10"
                     android:hint="Ημερομηνία"
                     android:inputType="date"
+                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/btnTimestamp"
                     app:layout_constraintTop_toBottomOf="@+id/tv1c" />
 
                 <EditText
                     android:id="@+id/etTime"
-                    android:layout_width="0dp"
+                    android:layout_width="80dp"
                     android:layout_height="0dp"
                     android:layout_marginEnd="8dp"
-                    android:layout_marginStart="8dp"
                     android:ems="10"
                     android:hint="Ώρα"
                     android:inputType="time"
-                    app:layout_constraintBottom_toBottomOf="@+id/etAddress"
-                    app:layout_constraintEnd_toStartOf="@+id/etAddress"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/etDay" />
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/etDate" />
 
                 <ImageButton
                     android:id="@+id/btnTimestamp"
                     style="@android:style/Widget.DeviceDefault.ImageButton"
-                    android:layout_width="0dp"
+                    android:layout_width="120dp"
                     android:layout_height="0dp"
-                    android:layout_marginEnd="8dp"
                     android:layout_marginLeft="8dp"
-                    android:layout_marginStart="8dp"
                     android:backgroundTint="@color/cardview_shadow_end_color"
                     android:scaleType="fitCenter"
                     app:layout_constraintBottom_toBottomOf="@+id/etDay"
-                    app:layout_constraintEnd_toStartOf="@+id/etDay"
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="@+id/etDate"
@@ -174,29 +181,30 @@
 
                 <ImageButton
                     android:id="@+id/btnOCR"
-                    android:layout_width="0dp"
+                    android:layout_width="120dp"
                     android:layout_height="0dp"
-                    android:layout_marginLeft="8dp"
-                    android:layout_marginRight="8dp"
+                    android:layout_marginStart="8dp"
                     android:backgroundTint="@color/cardview_shadow_end_color"
+                    android:padding="16dp"
                     android:scaleType="fitCenter"
                     android:scaleX="1.5"
                     android:scaleY="1.5"
                     app:layout_constraintBottom_toBottomOf="@+id/acBrand"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toLeftOf="@+id/acBrand"
+                    app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="@+id/etLiscencePlate"
-                    app:srcCompat="@mipmap/licenseplate" />
+                    app:srcCompat="@mipmap/licenceplate1" />
 
                 <EditText
                     android:id="@+id/etAddress"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="8dp"
+                    android:layout_marginStart="8dp"
                     android:ems="10"
                     android:hint="Διεύθυνση"
                     android:inputType="textPersonName"
                     app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/etDay" />
 
                 <AutoCompleteTextView
@@ -237,7 +245,7 @@
 
                 <ImageButton
                     android:id="@+id/btnFineInfo"
-                    android:layout_width="wrap_content"
+                    android:layout_width="50dp"
                     android:layout_height="0dp"
                     android:layout_marginStart="8dp"
                     android:layout_marginTop="8dp"
@@ -252,10 +260,11 @@
 
                 <ImageButton
                     android:id="@+id/btnFineClear"
-                    android:layout_width="wrap_content"
+                    android:layout_width="50dp"
                     android:layout_height="0dp"
                     android:layout_marginStart="8dp"
                     android:background="@android:color/transparent"
+                    android:padding="4dp"
                     android:scaleType="fitCenter"
                     app:layout_constraintBottom_toBottomOf="@+id/etPoints"
                     app:layout_constraintStart_toStartOf="parent"
@@ -264,15 +273,13 @@
 
                 <EditText
                     android:id="@+id/etCarCountry"
-                    android:layout_width="0dp"
+                    android:layout_width="60dp"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="8dp"
-                    android:layout_marginStart="8dp"
                     android:ems="10"
                     android:hint="Χώρα"
                     android:inputType="textPersonName"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/etLiscencePlate"
                     app:layout_constraintTop_toTopOf="@+id/etLiscencePlate" />
 
             </android.support.constraint.ConstraintLayout>
