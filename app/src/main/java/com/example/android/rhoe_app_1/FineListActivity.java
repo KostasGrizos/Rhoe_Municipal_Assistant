@@ -12,16 +12,22 @@ import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
 import android.text.Html;
 import android.text.Spanned;
+import android.text.TextWatcher;
 import android.util.Base64;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.Switch;
+import android.widget.TableLayout;
 import android.widget.TextView;
 
 import com.example.android.app_v12.R;
@@ -77,17 +83,22 @@ public class FineListActivity extends AppCompatActivity {
     FirebaseStorage storage = FirebaseStorage.getInstance();
     String userID;
     String MunicipalityIndex, MID, P1, P2, OfficerName, SignatureImage;
-    String selectedKey;
+    String selectedKey, plate;
     String DateSelected, TimeSelected, PlateSelected, AddressSelected, MunicipalityShort, MIDBlanks;
     Bitmap image;
     byte[] data;
 
+    EditText SearchbarEditText;
+    Switch AdvancedSwitch;
+    TableLayout SettingsTable;
+    CheckBox MunicipalityCheckBox, PaidCheckBox, UnpaidCheckBox;
+    boolean munB = false, paidB = false, unpaidB = false;
     ListView mListView;
     ArrayList<Spanned> list = new ArrayList<>();
     ArrayList<String> listKey = new ArrayList<>();
     ArrayAdapter adapter;
 
-    private String PlateReprint, PlateCountryReprint, ColorReprint, DateReprint, DayReprint, TimeReprint, AddressReprint, FineAmountReprint, FinePointsReprint, TypeReprint, FineTypeReprint, BrandReprint;
+    private String PlateReprint, PlateCountryReprint, ColorReprint, DateReprint, DayReprint, TimeReprint, AddressReprint, FineAmountReprint, FinePointsReprint, TypeReprint, FineTypeReprint, BrandReprint, PaidReprint;
     private String A1 = "", A2 = "", A3 = "", A4 = "", A5 = "", A6 = "", B1 = "", B2 = "", B3 = "", B4 = "", B5 = "", B6 = "", C1 = "", C2 = "", C3 = "", C4 = "", C5 = "", C6 = "", C7 = "", C8 = "", D1 = "", D2 = "", D3 = "", D4 = "", D5 = "";
 
     @Override
@@ -109,6 +120,12 @@ public class FineListActivity extends AppCompatActivity {
         mListView = (ListView) findViewById((R.id.lvFineList));
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_expandable_list_item_1, list);
 
+        SearchbarEditText = (EditText)findViewById(R.id.etSearchBar);
+        AdvancedSwitch = (Switch)findViewById(R.id.switchSettings);
+        SettingsTable = (TableLayout)findViewById(R.id.TableSettings);
+        MunicipalityCheckBox = (CheckBox)findViewById(R.id.cbMunicipality);
+        PaidCheckBox = (CheckBox)findViewById(R.id.cbPaid);
+        UnpaidCheckBox = (CheckBox) findViewById(R.id.cbUnpaid);
         mListView.setAdapter(adapter);
 
         mAuth = FirebaseAuth.getInstance();
@@ -116,7 +133,8 @@ public class FineListActivity extends AppCompatActivity {
         userID = user.getUid();
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         userDatabaseReference = FirebaseDatabase.getInstance().getReference("Users");
-        populateListView();
+        plate = "";
+        populateListView(plate, munB, paidB, unpaidB);
 
         StorageReference storageRef = storage.getReferenceFromUrl("gs://testproject-328af.appspot.com/");
         final StorageReference SignatureImagesRef = storageRef.child("Signatures/" + userID + ".jpg");
@@ -137,7 +155,79 @@ public class FineListActivity extends AppCompatActivity {
             }
         });
 
+        SearchbarEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                plate = SearchbarEditText.getText().toString();
+                adapter.clear();
+                populateListView(plate, munB, paidB, unpaidB);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+        MunicipalityCheckBox.setChecked(false);
+        PaidCheckBox.setChecked(true);
+        UnpaidCheckBox.setChecked(false);
+        AdvancedSwitch.setChecked(false);
+        SettingsTable.setVisibility(TableLayout.GONE);
+        AdvancedSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                checkSection(AdvancedSwitch.isChecked(),SettingsTable);
+            }
+        });
+
+        MunicipalityCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if (MunicipalityCheckBox.isChecked()) {
+                    munB = true;
+                    adapter.clear();
+                    populateListView(plate, munB, paidB, unpaidB);
+                } else {
+                    munB = false;
+                    adapter.clear();
+                    populateListView(plate, munB, paidB, unpaidB);
+                }
+            }
+        });
+        PaidCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if (PaidCheckBox.isChecked()) {
+                    paidB = true;
+                    adapter.clear();
+                    populateListView(plate, munB, paidB, unpaidB);
+                } else {
+                    paidB = false;
+                    adapter.clear();
+                    populateListView(plate, munB, paidB, unpaidB);
+                }
+            }
+        });
+        UnpaidCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if (UnpaidCheckBox.isChecked()) {
+                    unpaidB = true;
+                    adapter.clear();
+                    populateListView(plate, munB, paidB, unpaidB);
+                } else {
+                    unpaidB = false;
+                    adapter.clear();
+                    populateListView(plate, munB, paidB, unpaidB);
+                }
+            }
+        });
 
 
 
@@ -150,13 +240,14 @@ public class FineListActivity extends AppCompatActivity {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         showDataFromFine(dataSnapshot);
-                        showFineDetails(FineListActivity.this);
+                        if (Objects.equals(PaidReprint, "No")){
+                            showFineDetails(FineListActivity.this);
+                        }
                     }
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
                     }
                 });
-
             }
         });
 
@@ -169,24 +260,28 @@ public class FineListActivity extends AppCompatActivity {
         myAlert.setMessage(Html.fromHtml("<b>Ημερομηνία/Ώρα</b> <br>" + DateReprint + " " +TimeReprint + "<br>" +
                 "<b>Αρ. Κυκλοφορίας</b> <br>" + PlateReprint + "<br>" +
                 "<b>Διεύθυνση</b> <br>" + AddressReprint + "<br>"));
-        myAlert.setButton2("ΔΙΑΓΡΑΦΗ", new DialogInterface.OnClickListener() {
+        myAlert.setButton3("ΔΙΑΓΡΑΦΗ", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                myAlert.dismiss();
                 final AlertDialog myAlert1 = new AlertDialog.Builder(FineListActivity.this).create();
                 myAlert1.setTitle("Είστε σίγουροι ότι θέλετε να διαγράψετε την βεβαίωση");
                 myAlert1.setButton2("ΝΑΙ", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         mRefClick.setValue(null);
+                        SearchbarEditText.setText("");
+                        adapter.clear();
+                        populateListView(plate, munB, paidB, unpaidB);
                         myAlert1.dismiss();
-                        finish();
-                        Intent intent = new Intent(FineListActivity.this,FineListActivity.class);
-                        startActivity(intent);
                     }
                 });
                 myAlert1.setButton("ΑΚΥΡΩΣΗ", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        SearchbarEditText.setText("");
+                        adapter.clear();
+                        populateListView(plate, munB, paidB, unpaidB);
                         myAlert1.dismiss();
                     }
                 });
@@ -194,9 +289,10 @@ public class FineListActivity extends AppCompatActivity {
 
             }
         });
-        myAlert.setButton("ΕΠΑΝΕΚΤΥΠΩΣΗ", new DialogInterface.OnClickListener() {
+        myAlert.setButton2("ΕΠΑΝΕΚΤΥΠΩΣΗ", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                myAlert.dismiss();
                 new Thread(new Runnable() {
                     public void run() {Looper.prepare();
                         doConnectionTest();
@@ -212,12 +308,63 @@ public class FineListActivity extends AppCompatActivity {
                         }).start();
                     }
                 }).start();
+                SearchbarEditText.setText("");
+                adapter.clear();
+                populateListView(plate, munB, paidB, unpaidB);
+            }
+        });
+        myAlert.setButton("ΠΛΗΡΩΜΗ", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                myAlert.dismiss();
+                final AlertDialog myAlert2 = new AlertDialog.Builder(FineListActivity.this).create();
+                myAlert2.setTitle("Επιβεβαίωση Πληρωμής");
+                myAlert2.setButton3("ΕΠΙΒΕΒΑΙΩΣΗ", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        mRefClick.child("Paid").setValue("Yes");
+                        SearchbarEditText.setText("");
+                        adapter.clear();
+                        populateListView(plate, munB, paidB, unpaidB);
+                        myAlert2.dismiss();
+                    }
+                });
+                myAlert2.setButton2("ΕΠΙΒΕΒΑΙΩΣΗ/ΕΠΑΝΕΚΤΥΠΩΣΗ", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        mRefClick.child("Paid").setValue("Yes");
+                        SearchbarEditText.setText("");
+                        adapter.clear();
+                        populateListView(plate, munB, paidB, unpaidB);
+                        myAlert2.dismiss();
+                    }
+                });
+                myAlert2.setButton("ΑΚΥΡΩΣΗ", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        adapter.clear();
+                        SearchbarEditText.setText("");
+                        adapter.clear();
+                        populateListView(plate, munB, paidB, unpaidB);
+                        myAlert2.dismiss();
+                    }
+                });
+                myAlert2.show();
             }
         });
         myAlert.show();
     }
 
-    private void populateListView() {
+    private void checkSection(boolean condition, TableLayout table){
+        if(condition){
+            table.setVisibility(TableLayout.VISIBLE);
+        }
+        else {
+            table.setVisibility(TableLayout.GONE);
+        }
+    }
+
+    private void populateListView(final String plt, final boolean mun, final boolean paid, final boolean unpaid) {
         userDatabaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot UdataSnapshot) {
@@ -230,11 +377,58 @@ public class FineListActivity extends AppCompatActivity {
                         while (items.hasNext()) {
                             DataSnapshot item = items.next();
                             String RealUID = item.child("UserID").getValue().toString();
-                            if (Objects.equals(RealUID, userID)) {
-                                list.add(0, Html.fromHtml("<b>"+ item.child("Date").getValue().toString() + " " + item.child("Time").getValue().toString() + "</b> <br>" +
-                                        item.child("CarPlate").getValue().toString()));
-                                listKey.add(0, item.getKey());
-                                adapter.notifyDataSetChanged();
+                            String RealPlate = item.child("CarPlate").getValue().toString();
+                            String RealPaid = item.child("Paid").getValue().toString();
+                            if (!paid || !unpaid){
+                                if (!paid && !unpaid) {
+                                    if (mun) {
+                                        if (Objects.equals(plt, "") || RealPlate.contains(plt)) {
+                                            list.add(0, Html.fromHtml("<b>" + item.child("Date").getValue().toString() + " " + item.child("Time").getValue().toString() + "</b> <br>" +
+                                                    item.child("CarPlate").getValue().toString()));
+                                            listKey.add(0, item.getKey());
+                                            adapter.notifyDataSetChanged();
+                                        }
+                                    } else if(Objects.equals(RealUID, userID)) {
+                                        if (Objects.equals(plt, "") || RealPlate.contains(plt)) {
+                                            list.add(0, Html.fromHtml("<b>" + item.child("Date").getValue().toString() + " " + item.child("Time").getValue().toString() + "</b> <br>" +
+                                                    item.child("CarPlate").getValue().toString()));
+                                            listKey.add(0, item.getKey());
+                                            adapter.notifyDataSetChanged();
+                                        }
+                                    }
+                                } else if (paid) {
+                                    if (mun) {
+                                        if ((Objects.equals(plt, "") || RealPlate.contains(plt)) && Objects.equals(RealPaid, "No")) {
+                                            list.add(0, Html.fromHtml("<b>" + item.child("Date").getValue().toString() + " " + item.child("Time").getValue().toString() + "</b> <br>" +
+                                                    item.child("CarPlate").getValue().toString()));
+                                            listKey.add(0, item.getKey());
+                                            adapter.notifyDataSetChanged();
+                                        }
+                                    } else if(Objects.equals(RealUID, userID)) {
+                                        if ((Objects.equals(plt, "") || RealPlate.contains(plt)) && Objects.equals(RealPaid, "No")) {
+                                            list.add(0, Html.fromHtml("<b>" + item.child("Date").getValue().toString() + " " + item.child("Time").getValue().toString() + "</b> <br>" +
+                                                    item.child("CarPlate").getValue().toString()));
+                                            listKey.add(0, item.getKey());
+                                            adapter.notifyDataSetChanged();
+                                        }
+                                    }
+                                } else {
+                                    if (mun) {
+                                        if ((Objects.equals(plt, "") || RealPlate.contains(plt)) && Objects.equals(RealPaid, "Yes")) {
+                                            list.add(0, Html.fromHtml("<b>" + item.child("Date").getValue().toString() + " " + item.child("Time").getValue().toString() + "</b> <br>" +
+                                                    item.child("CarPlate").getValue().toString()));
+                                            listKey.add(0, item.getKey());
+                                            adapter.notifyDataSetChanged();
+                                        }
+                                    } else if(Objects.equals(RealUID, userID)) {
+                                        if ((Objects.equals(plt, "") || RealPlate.contains(plt)) && Objects.equals(RealPaid, "Yes")) {
+                                            list.add(0, Html.fromHtml("<b>" + item.child("Date").getValue().toString() + " " + item.child("Time").getValue().toString() + "</b> <br>" +
+                                                    item.child("CarPlate").getValue().toString()));
+                                            listKey.add(0, item.getKey());
+                                            adapter.notifyDataSetChanged();
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -748,7 +942,7 @@ public class FineListActivity extends AppCompatActivity {
             RInfo.setUserID(dataSnapshot.getValue(RetrieveFineInfoFirebase.class).getUserID());
             RInfo.setCarCountry(dataSnapshot.getValue(RetrieveFineInfoFirebase.class).getCarCountry());
             RInfo.setFinePoints(dataSnapshot.getValue(RetrieveFineInfoFirebase.class).getFinePoints());
-            //RInfo.setPaid(dataSnapshot.getValue(RetrieveFineInfoFirebase.class).getPaid());
+            RInfo.setPaid(dataSnapshot.getValue(RetrieveFineInfoFirebase.class).getPaid());
             RInfo.setLat(dataSnapshot.getValue(RetrieveFineInfoFirebase.class).getLat());
             RInfo.setLon(dataSnapshot.getValue(RetrieveFineInfoFirebase.class).getLon());
             AddressReprint = RInfo.getAddress();
@@ -763,6 +957,7 @@ public class FineListActivity extends AppCompatActivity {
             TimeReprint = RInfo.getTime();
             PlateCountryReprint = RInfo.getCarCountry();
             FinePointsReprint = RInfo.getFinePoints();
+            PaidReprint = RInfo.getPaid();
 
             if (dataSnapshot.hasChild("Fine A")) {
                 RInfo.setA1(dataSnapshot.child("Fine A").getValue(RetrieveFineInfoFirebase.class).getA1());
