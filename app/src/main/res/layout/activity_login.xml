@@ -59,10 +59,11 @@
         android:id="@+id/btnLoginFirebase"
         style="@style/Widget.AppCompat.Button.Colored"
         android:layout_width="103dp"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_marginTop="8dp"
-        android:backgroundTint="@color/colorAccent1"
-        android:text="Login"
+        android:background="@drawable/button_background"
+        android:backgroundTint="@color/colorAccent"
+        android:text="ΕΙΣΟΔΟΣ"
         app:layout_constraintLeft_toLeftOf="@+id/etPassword"
         app:layout_constraintTop_toBottomOf="@+id/etPassword" />
 
@@ -86,18 +87,20 @@
         android:layout_marginBottom="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
-        android:text="Rhoé Municipal Assistant | App Version: Beta 0.1"
+        android:text="Rhoé Municipal Assistant | App Version: Beta"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
 
     <Button
         android:id="@+id/btnRegister"
-        style="@style/Widget.AppCompat.Button.Colored"
         android:layout_width="103dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="Register"
+        android:background="@drawable/button_background"
+        android:text="ΕΓΓΡΑΦΗ"
+        style="@style/Widget.AppCompat.Button.Colored"
+        android:backgroundTint="@color/colorPrimary"
         app:layout_constraintEnd_toEndOf="@+id/etPassword"
         app:layout_constraintRight_toRightOf="@+id/etPassword"
         app:layout_constraintTop_toBottomOf="@+id/etPassword" />

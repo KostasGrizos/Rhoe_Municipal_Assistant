@@ -7,19 +7,6 @@
     android:layout_height="match_parent">
 
 
-    <TextView
-        android:id="@+id/tvConnectivityStatusDash"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@android:color/holo_red_dark"
-        android:padding="8dp"
-        android:text="Εκτυπωτής: Μη Συνδεδεμένος"
-        android:textAlignment="center"
-        android:textColor="@android:color/background_light"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"

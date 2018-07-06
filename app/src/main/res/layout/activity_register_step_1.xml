@@ -23,10 +23,10 @@
 
     <EditText
         android:id="@+id/etEmailReg"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginEnd="64dp"
+        android:layout_marginStart="64dp"
         android:layout_marginTop="64dp"
         android:layout_weight="1"
         android:ems="10"
@@ -38,31 +38,27 @@
 
     <EditText
         android:id="@+id/etPasswordReg"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
+        android:layout_width="0dp"
+        android:layout_height="46dp"
         android:layout_marginTop="16dp"
         android:layout_weight="1"
         android:ems="10"
         android:hint="Κωδικός Πρόσβασης"
         android:inputType="textPassword"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/etEmailReg"
+        app:layout_constraintStart_toStartOf="@+id/etEmailReg"
         app:layout_constraintTop_toBottomOf="@+id/etEmailReg" />
 
     <EditText
         android:id="@+id/etPasswordConfReg"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
         android:layout_marginTop="16dp"
         android:ems="10"
         android:hint="Επαλήθευση Κωδικού"
         android:inputType="textPassword"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/etPasswordReg"
+        app:layout_constraintStart_toStartOf="@+id/etPasswordReg"
         app:layout_constraintTop_toBottomOf="@+id/etPasswordReg" />
 
     <LinearLayout
@@ -80,7 +76,9 @@
             style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginRight="4dp"
             android:layout_weight="1"
+            android:background="@drawable/button_background"
             android:backgroundTint="@color/colorAccent1"
             android:text="ΑΚΥΡΩΣΗ" />
 
@@ -88,7 +86,9 @@
             android:id="@+id/btnContinueReg"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="4dp"
             android:layout_weight="1"
+            android:background="@drawable/button_background"
             android:backgroundTint="@color/colorAccent"
             android:text="ΣΥΝΕΧΕΙΑ"
             android:textColor="@android:color/white" />

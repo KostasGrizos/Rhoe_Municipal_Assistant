@@ -92,12 +92,12 @@ public class RegisterActivity extends AppCompatActivity {
         //Signature
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         signatureArea = new SignatureArea(this);
-        LinearLayout SignatureLinearLayout = (LinearLayout) findViewById(R.id.signature_linear_layout);
+        //LinearLayout SignatureLinearLayout = (LinearLayout) findViewById(R.id.signature_linear_layout);
         //ConstraintLayout registerConstraintLayout = (ConstraintLayout) findViewById(R.id.register_constraint_layout);
-        SignatureLinearLayout.addView(signatureArea, 0 , params);
+        //SignatureLinearLayout.addView(signatureArea, 0 , params);
 
-        StorageReference storageRef = storage.getReferenceFromUrl("gs://testproject-328af.appspot.com/");
-        final StorageReference SignatureImagesRef = storageRef.child("Signatures/" + userID + ".jpg");
+        //StorageReference storageRef = storage.getReferenceFromUrl("gs://testproject-328af.appspot.com/");
+        //final StorageReference SignatureImagesRef = storageRef.child("Signatures/" + userID + ".jpg");
 
 
         TypeReg = (Spinner) findViewById(R.id.spAccountTypeReg);
@@ -141,6 +141,7 @@ public class RegisterActivity extends AppCompatActivity {
         FinishReg.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                /*
                 image = signatureArea.getBitmap();
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 image.compress(Bitmap.CompressFormat.JPEG, 100, baos);
@@ -159,6 +160,7 @@ public class RegisterActivity extends AppCompatActivity {
                         Uri downloadUrl = taskSnapshot.getDownloadUrl();
                     }
                 });
+                */
 
                 saveUserInformation();
             }

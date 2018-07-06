@@ -72,10 +72,6 @@ public class LoginActivity extends AppCompatActivity {
         NewUserButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if((Username.getText().toString().equals("admin")) && (Password.getText().toString().equals("kostas"))){
-                    Intent intent = new Intent(LoginActivity.this, RegisterStep1Activity.class);
-                    startActivity(intent);
-                }
                 adminLogin( RegisterStep1Activity.class);
                 LoginMessage.setText("Πρόσβαση μόνο σε Διαχειριστές");
             }

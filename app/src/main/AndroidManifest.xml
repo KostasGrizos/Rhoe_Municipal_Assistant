@@ -7,6 +7,7 @@
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -14,16 +15,16 @@
     <uses-feature
         android:name="android.hardware.usb.host"
         android:required="false" />
+    <uses-feature android:name="android.hardware.location.gps" />
 
-    <!-- Zebra -->
-    <!-- <uses-permission android:name="com.symbol.emdk.permission.EMDK" /> -->
     <application
         android:allowBackup="true"
         android:icon="@mipmap/g20"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/g20"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        android:name="com.example.android.rhoe_app_1.Rhoe_Municipal_Assistant">
 
         <!-- Zebra -->
         <!-- <uses-library android:name="com.symbol.emdk"/> -->
@@ -42,19 +43,19 @@
 
         <activity android:name="com.example.android.rhoe_app_1.DashboardActivity" />
         <activity android:name="com.example.android.rhoe_app_1.RegisterActivity" />
-        <activity android:name="com.example.android.rhoe_app_1.FineAdvancedActivity" />
         <activity android:name="com.example.android.rhoe_app_1.FineListActivity" />
         <activity
             android:name="com.example.android.rhoe_app_1.FineEditActivity"
             android:label="@string/title_activity_fine_edit"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name="com.example.android.rhoe_app_1.BluetoothConnectActivity" />
-        <activity android:name="com.example.android.rhoe_app_1.BluetoothFindActivity" />
+        <!--activity android:name="com.example.android.rhoe_app_1.BluetoothFindActivity" /-->
         <activity android:name="com.example.android.rhoe_app_1.Zebra.BluetoothDiscovery" />
         <activity android:name="com.example.android.rhoe_app_1.RegisterStep1Activity" />
         <activity android:name="com.example.android.rhoe_app_1.EditUserActivity" />
         <activity android:name="com.example.android.rhoe_app_1.AnalyticsActivity" />
-        <activity android:name="com.example.android.rhoe_app_1.FineCompleteActivity"></activity>
+        <activity android:name="com.example.android.rhoe_app_1.FineCompleteActivity" />
+        <!--activity android:name="com.example.android.rhoe_app_1.ListAdapterActivity"></activity-->
     </application>
 
 </manifest>

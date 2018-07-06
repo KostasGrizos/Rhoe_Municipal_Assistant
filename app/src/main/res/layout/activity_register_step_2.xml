@@ -32,10 +32,13 @@
 
         <TextView
             android:id="@+id/tvAccountTypeReg"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="32dp"
             android:text="Λογαριασμός"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvReg2" />
 
@@ -43,72 +46,55 @@
             android:id="@+id/spAccountTypeReg"
             android:layout_width="0dp"
             android:layout_height="23dp"
+            android:layout_marginTop="8dp"
             android:entries="@array/spinnerAccountType"
             android:visibility="visible"
+            app:layout_constraintEnd_toEndOf="@+id/tvAccountTypeReg"
             app:layout_constraintHorizontal_bias="0.156"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tvAccountTypeReg"
-            tools:layout_editor_absoluteX="66dp"
-            tools:layout_editor_absoluteY="160dp" />
+            app:layout_constraintStart_toStartOf="@+id/tvAccountTypeReg"
+            app:layout_constraintTop_toBottomOf="@+id/tvAccountTypeReg" />
 
         <EditText
             android:id="@+id/etLastNameReg"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
             android:ems="10"
             android:hint="Επώνυμο"
             android:inputType="text"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/etFirstNameReg"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/etFirstNameReg"
-            tools:layout_editor_absoluteX="72dp"
-            tools:layout_editor_absoluteY="196dp" />
+            app:layout_constraintStart_toStartOf="@+id/etFirstNameReg"
+            app:layout_constraintTop_toBottomOf="@+id/etFirstNameReg" />
 
         <EditText
             android:id="@+id/etFirstNameReg"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
             android:ems="10"
             android:hint="Όνομα"
             android:inputType="text"
+            app:layout_constraintEnd_toEndOf="@+id/spAccountTypeReg"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/spAccountTypeReg"
-            tools:layout_editor_absoluteX="191dp"
-            tools:layout_editor_absoluteY="255dp" />
+            app:layout_constraintStart_toStartOf="@+id/spAccountTypeReg"
+            app:layout_constraintTop_toBottomOf="@+id/spAccountTypeReg" />
 
         <AutoCompleteTextView
             android:id="@+id/acMunicipality"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
             android:hint="Καλλικρατικός Δήμος"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/etLastNameReg"
             app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/etLastNameReg"
-            tools:layout_editor_absoluteX="220dp"
-            tools:layout_editor_absoluteY="274dp" />
+            app:layout_constraintStart_toStartOf="@+id/etLastNameReg"
+            app:layout_constraintTop_toBottomOf="@+id/etLastNameReg" />
 
-        <TextView
-            android:id="@+id/tvSignatureReg"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Υπογραφή"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/acMunicipality"
-            tools:layout_editor_absoluteX="113dp"
-            tools:layout_editor_absoluteY="141dp" />
     </android.support.constraint.ConstraintLayout>
-
-    <LinearLayout
-        android:id="@+id/signature_linear_layout"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.35"
-        android:orientation="vertical"></LinearLayout>
 
     <LinearLayout
         android:id="@+id/linearLayout4"
@@ -127,7 +113,9 @@
             style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginRight="4dp"
             android:layout_weight="1"
+            android:background="@drawable/button_background"
             android:backgroundTint="@color/colorAccent1"
             android:text="ΠΙΣΩ"
             tools:layout_editor_absoluteX="209dp"
@@ -138,7 +126,9 @@
             style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="4dp"
             android:layout_weight="1"
+            android:background="@drawable/button_background"
             android:backgroundTint="@color/colorAccent"
             android:text="ΟΛΟΚΛΗΡΩΣΗ"
             android:textAllCaps="false"

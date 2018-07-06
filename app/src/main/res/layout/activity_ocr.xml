@@ -58,7 +58,10 @@
             style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="0dp"
             android:layout_height="match_parent"
+            android:layout_marginRight="8dp"
             android:layout_weight="0.5"
+            android:background="@drawable/button_background"
+            android:backgroundTint="@color/colorAccent1"
             android:text="ΑΚΥΡΩΣΗ" />
 
         <Button
@@ -66,8 +69,10 @@
             style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="0dp"
             android:layout_height="match_parent"
+            android:layout_marginLeft="8dp"
             android:layout_weight="0.5"
-            android:backgroundTint="@color/colorAccent1"
+            android:background="@drawable/button_background"
+            android:backgroundTint="@color/colorAccent"
             android:text="ΕΠΙΒΕΒΑΙΩΣΗ" />
 
     </LinearLayout>

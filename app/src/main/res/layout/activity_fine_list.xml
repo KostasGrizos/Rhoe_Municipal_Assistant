@@ -10,7 +10,7 @@
         android:layout_height="0dp"
         android:layout_weight="0.05"
         android:background="@android:color/holo_red_dark"
-        android:padding="2dp"
+        android:padding="4dp"
         android:text="Εκτυπωτής: Μη Συνδεδεμένος"
         android:textAlignment="center"
         android:textColor="@android:color/background_light" />
@@ -39,18 +39,19 @@
 
         <TableRow
             android:layout_width="match_parent"
-            android:layout_height="match_parent" >
+            android:layout_height="match_parent">
 
             <CheckBox
                 android:id="@+id/cbMunicipality"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Προβολή Βεβαιώσεων όλων των Χρηστών" />
+
         </TableRow>
 
         <TableRow
             android:layout_width="match_parent"
-            android:layout_height="match_parent" >
+            android:layout_height="match_parent">
 
             <CheckBox
                 android:id="@+id/cbPaid"
@@ -61,7 +62,7 @@
 
         <TableRow
             android:layout_width="match_parent"
-            android:layout_height="match_parent" >
+            android:layout_height="match_parent">
 
             <CheckBox
                 android:id="@+id/cbUnpaid"

@@ -55,6 +55,7 @@ public class DashboardActivity extends AppCompatActivity {
         FirebaseUser user =firebaseAuth.getCurrentUser();
         userID = user.getUid();
         databaseReference = FirebaseDatabase.getInstance().getReference("Users");
+        databaseReference.keepSynced(true);
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -66,8 +67,6 @@ public class DashboardActivity extends AppCompatActivity {
 
             }
         });
-
-        ConnectivityStatusDashTextView = (TextView)findViewById(R.id.tvConnectivityStatusDash);
 
         LogoutButton = (ImageButton)findViewById(R.id.btnLogout);
         FineLogButton = (ImageButton)findViewById(R.id.btnFineLog);
