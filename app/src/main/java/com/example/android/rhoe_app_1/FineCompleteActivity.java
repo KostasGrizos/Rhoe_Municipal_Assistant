@@ -810,7 +810,7 @@ public class FineCompleteActivity extends AppCompatActivity implements LocationL
                 double lng = Double.parseDouble(strings[0].split(",")[1]);
                 String response;
                 HttpDataHandler http = new HttpDataHandler();
-                String url = String.format("https://maps.googleapis.com/maps/api/geocode/json?latlng=%.4f,%.4f&sensor=false&language=el",lat,lng);
+                String url = String.format("https://maps.googleapis.com/maps/api/geocode/json?latlng=%.4f,%.4f&sensor=false&language=en",lat,lng);
                 response = http.GetHTTPData(url);
                 return response;
             }
