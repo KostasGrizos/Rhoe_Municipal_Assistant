@@ -357,7 +357,7 @@ public class FineCompleteActivity extends AppCompatActivity implements LocationL
             @Override
             public void onClick(View view) {
                 getTimestampFull();
-                getLocationButton();
+                //getLocationButton();
             }
         });
 
@@ -645,8 +645,8 @@ public class FineCompleteActivity extends AppCompatActivity implements LocationL
                     (FineBasic[9].length() != 0) &&
                     (FineBasic[10].length() != 0) &&
                     (FineBasic[11].length() != 0) &&
-                    (latF != 0) &&
-                    (lonF != 0) &&
+                    //(latF != 0) &&
+                    //(lonF != 0) &&
                     DateFirebase != null)
             {
 
