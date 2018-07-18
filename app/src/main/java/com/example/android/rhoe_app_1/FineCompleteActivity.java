@@ -2,15 +2,12 @@ package com.example.android.rhoe_app_1;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.icu.text.SimpleDateFormat;
-import android.icu.util.Calendar;
 import android.icu.util.TimeZone;
 import android.location.Criteria;
 import android.location.Location;
@@ -20,12 +17,10 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.Html;
 import android.text.TextWatcher;
@@ -69,30 +64,24 @@ import com.zebra.sdk.printer.ZebraPrinter;
 import com.zebra.sdk.printer.ZebraPrinterFactory;
 import com.zebra.sdk.printer.ZebraPrinterLanguageUnknownException;
 
-import org.apache.commons.net.ntp.TimeStamp;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Arrays;
 import java.util.Locale;
-import java.util.Objects;
-import java.util.concurrent.locks.Condition;
 
 public class FineCompleteActivity extends AppCompatActivity implements LocationListener {
 
     //Database
-    DatabaseReference databaseReference;
-    DatabaseReference userDatabaseReference;
-    DatabaseReference municipalitiesDatabaseReference;
-    DatabaseReference tempDatabaseReference;
-    private FirebaseAuth firebaseAuth;
-    private String userID, P1, P2, LocalMAC, MunicipalityIndex, OfficerName, MunicipalityShort, MID, MIDBlanks;
-    private String munAddress, munBank, munBankIBAN, munDepartment, munEmail, munName, munPayAddress1, munPayAddress2, munPayAddress3, munPayName, munPostNum, munRegion, munTel1, munTel2;
+    DatabaseReference fb_DataRef_Fine, fb_DataRef_User, fb_DataRef_Municipality, fb_DataRef_FineTemp;
+    FirebaseAuth fb_Auth;
+    private String fb_User_userID, fb_User_P1, fb_User_P2, fb_User_LocalMAC, fb_User_MunicipalityIndex, fb_User_OfficerName, fb_User_MunicipalityShort, fb_User_MID, fb_User_MIDBlanks;
+    private String fb_Mun_Address, fb_Mun_Bank, fb_Mun_BankIBAN, fb_Mun_Department, fb_Mun_Email, fb_Mun_Name, fb_Mun_PayAddress1, fb_Mun_PayAddress2, fb_Mun_PayAddress3, fb_Mun_PayName, fb_Mun_PostNum, fb_Mun_Region, fb_Mun_Tel1, fb_Mun_Tel2;
 
     //Zebra Printer
-    private ZebraPrinter printer;
-    private Connection printerConnection;
+    private ZebraPrinter zebra_printer;
+    private Connection zebra_printerConnection;
     private TextView ConnectivityStatusFineTextView;
 
     //Basic Information
@@ -124,6 +113,7 @@ public class FineCompleteActivity extends AppCompatActivity implements LocationL
     private Switch switchA, switchB, switchC, switchD;
     private TableLayout tableA, tableB, tableC, tableD;
     private EditText A1, A2, A3, A4, A5, A6, B1, B2, B3, B4, B5, B6, C2, C3, C4, C5, C6, C7, C8, D1, D2, D3, D4, D5;
+    boolean conA, conB, conC, conD;
     private Spinner C1;
 
     //Tables
@@ -182,22 +172,22 @@ public class FineCompleteActivity extends AppCompatActivity implements LocationL
         }).start();
 
         //Firebase Connection
-        firebaseAuth = FirebaseAuth.getInstance();
-        if (firebaseAuth.getCurrentUser() == null) {
+        fb_Auth = FirebaseAuth.getInstance();
+        if (fb_Auth.getCurrentUser() == null) {
             //profile activity
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
         }
         FirebaseDatabase database = FirebaseDatabase.getInstance();
-        FirebaseUser user = firebaseAuth.getCurrentUser();
-        userID = user.getUid();
-        userDatabaseReference = FirebaseDatabase.getInstance().getReference("Users");
-        userDatabaseReference.addValueEventListener(new ValueEventListener() {
+        FirebaseUser user = fb_Auth.getCurrentUser();
+        fb_User_userID = user.getUid();
+        fb_DataRef_User = FirebaseDatabase.getInstance().getReference("Users");
+        fb_DataRef_User.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 showData(dataSnapshot);
-                municipalitiesDatabaseReference = FirebaseDatabase.getInstance().getReference("Municipalities").child(MID);
-                municipalitiesDatabaseReference.addValueEventListener(new ValueEventListener() {
+                fb_DataRef_Municipality = FirebaseDatabase.getInstance().getReference("Municipalities").child(fb_User_MID);
+                fb_DataRef_Municipality.addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         showDataFromMunicipality(dataSnapshot);
@@ -216,9 +206,9 @@ public class FineCompleteActivity extends AppCompatActivity implements LocationL
             }
         });
 
-        tempDatabaseReference = FirebaseDatabase.getInstance().getReference("TempFine").child("Temp " + userID);
+        fb_DataRef_FineTemp = FirebaseDatabase.getInstance().getReference("TempFine").child("Temp " + fb_User_userID);
         if (!ConditionOCR) {
-            tempDatabaseReference.addValueEventListener(new ValueEventListener() {
+            fb_DataRef_FineTemp.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     showDataFromOCR(dataSnapshot);
@@ -462,24 +452,24 @@ public class FineCompleteActivity extends AppCompatActivity implements LocationL
     private void showData (DataSnapshot dataSnapshot) {
         for (DataSnapshot ds : dataSnapshot.getChildren()){
             RetrieveUserInfoFirebase RUInfo = new RetrieveUserInfoFirebase();
-            RUInfo.setFname(dataSnapshot.child(userID).getValue(RetrieveUserInfoFirebase.class).getFname());
-            RUInfo.setLname(dataSnapshot.child(userID).getValue(RetrieveUserInfoFirebase.class).getLname());
-            RUInfo.setMID(dataSnapshot.child(userID).getValue(RetrieveUserInfoFirebase.class).getMID());
-            RUInfo.setMunicipality(dataSnapshot.child(userID).getValue(RetrieveUserInfoFirebase.class).getMunicipality());
-            RUInfo.setSignatureNum(dataSnapshot.child(userID).getValue(RetrieveUserInfoFirebase.class).getSignatureNum());
-            RUInfo.setType(dataSnapshot.child(userID).getValue(RetrieveUserInfoFirebase.class).getType());
-            RUInfo.setMACAddress(dataSnapshot.child(userID).getValue(RetrieveUserInfoFirebase.class).getMACAddress());
-            RUInfo.setPrinterFriendlyName(dataSnapshot.child(userID).getValue(RetrieveUserInfoFirebase.class).getPrinterFriendlyName());
+            RUInfo.setFname(dataSnapshot.child(fb_User_userID).getValue(RetrieveUserInfoFirebase.class).getFname());
+            RUInfo.setLname(dataSnapshot.child(fb_User_userID).getValue(RetrieveUserInfoFirebase.class).getLname());
+            RUInfo.setMID(dataSnapshot.child(fb_User_userID).getValue(RetrieveUserInfoFirebase.class).getMID());
+            RUInfo.setMunicipality(dataSnapshot.child(fb_User_userID).getValue(RetrieveUserInfoFirebase.class).getMunicipality());
+            RUInfo.setSignatureNum(dataSnapshot.child(fb_User_userID).getValue(RetrieveUserInfoFirebase.class).getSignatureNum());
+            RUInfo.setType(dataSnapshot.child(fb_User_userID).getValue(RetrieveUserInfoFirebase.class).getType());
+            RUInfo.setMACAddress(dataSnapshot.child(fb_User_userID).getValue(RetrieveUserInfoFirebase.class).getMACAddress());
+            RUInfo.setPrinterFriendlyName(dataSnapshot.child(fb_User_userID).getValue(RetrieveUserInfoFirebase.class).getPrinterFriendlyName());
 
-            MunicipalityIndex = RUInfo.getMunicipality();
-            MID = RUInfo.getMID();
-            databaseReference = FirebaseDatabase.getInstance().getReference("Fines").child(MID);
-            P1 = RUInfo.getMACAddress();
-            P2 = RUInfo.getPrinterFriendlyName();
-            OfficerName = RUInfo.getLname() + " " + RUInfo.getFname();
-            MunicipalityShort = MunicipalityIndex.subSequence(6, MunicipalityIndex.length()).toString();
+            fb_User_MunicipalityIndex = RUInfo.getMunicipality();
+            fb_User_MID = RUInfo.getMID();
+            fb_DataRef_Fine = FirebaseDatabase.getInstance().getReference("Fines").child(fb_User_MID);
+            fb_User_P1 = RUInfo.getMACAddress();
+            fb_User_P2 = RUInfo.getPrinterFriendlyName();
+            fb_User_OfficerName = RUInfo.getLname() + " " + RUInfo.getFname();
+            fb_User_MunicipalityShort = fb_User_MunicipalityIndex.subSequence(6, fb_User_MunicipalityIndex.length()).toString();
 
-            MIDBlanks = RUInfo.getMID().subSequence(0, 1).toString() + "  "  +
+            fb_User_MIDBlanks = RUInfo.getMID().subSequence(0, 1).toString() + "  "  +
                     RUInfo.getMID().subSequence(1, 2).toString() + "  "  +
                     RUInfo.getMID().subSequence(2, 3).toString() + "  "  +
                     RUInfo.getMID().subSequence(3, 4).toString();
@@ -505,20 +495,20 @@ public class FineCompleteActivity extends AppCompatActivity implements LocationL
             RMInfo.setMunTel1(dataSnapshot.getValue(RetrieveMunicipalityInfoFirebase.class).getMunTel1());
             RMInfo.setMunTel2(dataSnapshot.getValue(RetrieveMunicipalityInfoFirebase.class).getMunTel2());
 
-            munAddress = RMInfo.getMunAddress();
-            munBank = RMInfo.getMunBank();
-            munBankIBAN = RMInfo.getMunBankIBAN();
-            munDepartment = RMInfo.getMunDepartment();
-            munEmail = RMInfo.getMunEmail();
-            munName = RMInfo.getMunName();
-            munPayAddress1 = RMInfo.getMunPayAddress1();
-            munPayAddress2 = RMInfo.getMunPayAddress2();
-            munPayAddress3 = RMInfo.getMunPayAddress3();
-            munPayName = RMInfo.getMunPayName();
-            munPostNum = RMInfo.getMunPostNum();
-            munRegion = RMInfo.getMunRegion();
-            munTel1 = RMInfo.getMunTel1();
-            munTel2 = RMInfo.getMunTel2();
+            fb_Mun_Address = RMInfo.getMunAddress();
+            fb_Mun_Bank = RMInfo.getMunBank();
+            fb_Mun_BankIBAN = RMInfo.getMunBankIBAN();
+            fb_Mun_Department = RMInfo.getMunDepartment();
+            fb_Mun_Email = RMInfo.getMunEmail();
+            fb_Mun_Name = RMInfo.getMunName();
+            fb_Mun_PayAddress1 = RMInfo.getMunPayAddress1();
+            fb_Mun_PayAddress2 = RMInfo.getMunPayAddress2();
+            fb_Mun_PayAddress3 = RMInfo.getMunPayAddress3();
+            fb_Mun_PayName = RMInfo.getMunPayName();
+            fb_Mun_PostNum = RMInfo.getMunPostNum();
+            fb_Mun_Region = RMInfo.getMunRegion();
+            fb_Mun_Tel1 = RMInfo.getMunTel1();
+            fb_Mun_Tel2 = RMInfo.getMunTel2();
         }
     }
 
@@ -607,14 +597,14 @@ public class FineCompleteActivity extends AppCompatActivity implements LocationL
                 A4.getText().toString(),
                 A5.getText().toString(),
                 A6.getText().toString()};
-        boolean conA = extraInfoChecker(6, A);
+        conA = extraInfoChecker(6, A);
         B = new String[]{B1.getText().toString(),
                 B2.getText().toString(),
                 B3.getText().toString(),
                 B4.getText().toString(),
                 B5.getText().toString(),
                 B6.getText().toString()};
-        boolean conB = extraInfoChecker(6, B);
+        conB = extraInfoChecker(6, B);
         C = new String[]{C1.getSelectedItem().toString(),
                 C2.getText().toString(),
                 C3.getText().toString(),
@@ -623,7 +613,7 @@ public class FineCompleteActivity extends AppCompatActivity implements LocationL
                 C6.getText().toString(),
                 C7.getText().toString(),
                 C8.getText().toString()};
-        boolean conC = extraInfoChecker(8, C);
+        conC = extraInfoChecker(8, C);
         D = new String[]{D1.getText().toString(),
                 D2.getText().toString(),
                 D3.getText().toString(),
@@ -650,7 +640,7 @@ public class FineCompleteActivity extends AppCompatActivity implements LocationL
                     DateFirebase != null)
             {
 
-                FirebaseUser userFirebase =firebaseAuth.getCurrentUser();
+                FirebaseUser userFirebase =fb_Auth.getCurrentUser();
 
                 FineBasicInfoFirebase fineBasicInfoFirebase = new FineBasicInfoFirebase(FineBasic[0],
                         FineBasic[1],
@@ -669,23 +659,23 @@ public class FineCompleteActivity extends AppCompatActivity implements LocationL
                         latF,
                         lonF);
 
-                databaseReference.child(DateFirebase).setValue(fineBasicInfoFirebase);
+                fb_DataRef_Fine.child(DateFirebase).setValue(fineBasicInfoFirebase);
 
                 if (!conA) {
                     FineAInfoFirebase fineAInfoFirebase = new FineAInfoFirebase(A[0], A[1], A[2], A[3], A[4], A[5]);
-                    databaseReference.child(DateFirebase).child("Fine A").setValue(fineAInfoFirebase);
+                    fb_DataRef_Fine.child(DateFirebase).child("Fine A").setValue(fineAInfoFirebase);
                 }
                 if (!conB) {
                     FineBInfoFirebase fineBInfoFirebase = new FineBInfoFirebase(B[0], B[1], B[2], B[3], B[4], B[5]);
-                    databaseReference.child(DateFirebase).child("Fine A").setValue(fineBInfoFirebase);
+                    fb_DataRef_Fine.child(DateFirebase).child("Fine B").setValue(fineBInfoFirebase);
                 }
                 if (!conC) {
                     FineCInfoFirebase fineCInfoFirebase = new FineCInfoFirebase(C[0], C[1], C[2], C[3], C[4], C[5], C[6], C[7]);
-                    databaseReference.child(DateFirebase).child("Fine C").setValue(fineCInfoFirebase);
+                    fb_DataRef_Fine.child(DateFirebase).child("Fine C").setValue(fineCInfoFirebase);
                 }
                 if (!conD) {
                     FineDInfoFirebase fineDInfoFirebase = new FineDInfoFirebase(D[0], D[1], D[2], D[3], D[4]);
-                    databaseReference.child(DateFirebase).child("Fine D").setValue(fineDInfoFirebase);
+                    fb_DataRef_Fine.child(DateFirebase).child("Fine D").setValue(fineDInfoFirebase);
                 }
 
                 //Printer
@@ -701,14 +691,14 @@ public class FineCompleteActivity extends AppCompatActivity implements LocationL
 
                 }
 
-                tempDatabaseReference.setValue(null);
+                fb_DataRef_FineTemp.setValue(null);
                 Intent intent = new Intent(FineCompleteActivity.this, DashboardActivity.class);
                 startActivity(intent);
 
             } else {
                 toastMessage("You must complete all the fields!");
             }
-        } else {FirebaseUser userFirebase =firebaseAuth.getCurrentUser();
+        } else {FirebaseUser userFirebase =fb_Auth.getCurrentUser();
 
             FineBasicInfoFirebase fineBasicInfoFirebase = new FineBasicInfoFirebase(BlankField(FineBasic[0]),
                     BlankField(FineBasic[1]),
@@ -727,23 +717,23 @@ public class FineCompleteActivity extends AppCompatActivity implements LocationL
                     BlankFieldL(latF),
                     BlankFieldL(lonF));
 
-            tempDatabaseReference.setValue(fineBasicInfoFirebase);
+            fb_DataRef_FineTemp.setValue(fineBasicInfoFirebase);
 
             if (!conA) {
                 FineAInfoFirebase fineAInfoFirebase = new FineAInfoFirebase(A[0], A[1], A[2], A[3], A[4], A[5]);
-                tempDatabaseReference.child("Fine A").setValue(fineAInfoFirebase);
+                fb_DataRef_FineTemp.child("Fine A").setValue(fineAInfoFirebase);
             }
             if (!conB) {
                 FineBInfoFirebase fineBInfoFirebase = new FineBInfoFirebase(B[0], B[1], B[2], B[3], B[4], B[5]);
-                tempDatabaseReference.child("Fine A").setValue(fineBInfoFirebase);
+                fb_DataRef_FineTemp.child("Fine A").setValue(fineBInfoFirebase);
             }
             if (!conC) {
                 FineCInfoFirebase fineCInfoFirebase = new FineCInfoFirebase(C[0], C[1], C[2], C[3], C[4], C[5], C[6], C[7]);
-                tempDatabaseReference.child("Fine C").setValue(fineCInfoFirebase);
+                fb_DataRef_FineTemp.child("Fine C").setValue(fineCInfoFirebase);
             }
             if (!conD) {
                 FineDInfoFirebase fineDInfoFirebase = new FineDInfoFirebase(D[0], D[1], D[2], D[3], D[4]);
-                tempDatabaseReference.child("Fine D").setValue(fineDInfoFirebase);
+                fb_DataRef_FineTemp.child("Fine D").setValue(fineDInfoFirebase);
             }
 
             //Printer
@@ -839,17 +829,17 @@ public class FineCompleteActivity extends AppCompatActivity implements LocationL
 
     //Printer Proccessing
     private void doConnection() {
-        printer = connect();
+        zebra_printer = connect();
     }
 
     public ZebraPrinter connect() {
         setStatus("Σύνδεση...", Color.YELLOW);
-        printerConnection = null;
-        printerConnection = new BluetoothConnection(getMacAddressFieldText());
+        zebra_printerConnection = null;
+        zebra_printerConnection = new BluetoothConnection(getMacAddressFieldText());
         SettingsHelper.saveBluetoothAddress(this, getMacAddressFieldText());
 
         try {
-            printerConnection.open();
+            zebra_printerConnection.open();
             setStatus("Εκτυπωτής: Συνδεδεμένος", Color.GREEN);
         } catch (ConnectionException e) {
             setStatus("Σφάλμα Επικοινωνίας! Αποσύνδεση", Color.RED);
@@ -859,9 +849,9 @@ public class FineCompleteActivity extends AppCompatActivity implements LocationL
 
         ZebraPrinter printer = null;
 
-        if (printerConnection.isConnected()) {
+        if (zebra_printerConnection.isConnected()) {
             try {
-                printer = ZebraPrinterFactory.getInstance(printerConnection);
+                printer = ZebraPrinterFactory.getInstance(zebra_printerConnection);
                 setStatus("Εντοπισμός Γλώσσας...", Color.YELLOW);
                 PrinterLanguage pl = printer.getPrinterControlLanguage();
                 setStatus("Εκτυπωτής: Συνδεδεμένος [" + pl + "]", Color.GREEN);
@@ -884,8 +874,8 @@ public class FineCompleteActivity extends AppCompatActivity implements LocationL
     public void disconnect() {
         try {
             setStatus("Αποσύνδεση...", Color.RED);
-            if (printerConnection != null) {
-                printerConnection.close();
+            if (zebra_printerConnection != null) {
+                zebra_printerConnection.close();
             }
             setStatus("Εκτυπωτής: Μη Συνδεδεμένος", Color.RED);
         } catch (ConnectionException e) {
@@ -894,7 +884,7 @@ public class FineCompleteActivity extends AppCompatActivity implements LocationL
     }
 
     private String getMacAddressFieldText() {
-        return P1;
+        return fb_User_P1;
     }
 
     private void setStatus(final String statusMessage, final int color) {
@@ -908,7 +898,7 @@ public class FineCompleteActivity extends AppCompatActivity implements LocationL
     }
 
     private void doConnectionTest() {
-        if (printer != null) {
+        if (zebra_printer != null) {
             //sendFineLabel(createZplFine());
             //sendFineLabel(createZplFineBack());
             //sendFineLabel(createZplQR());
@@ -920,11 +910,11 @@ public class FineCompleteActivity extends AppCompatActivity implements LocationL
     private void sendFineLabel(String Doc) {
         try {
             byte[] configLabel = getConfigLabel(Doc);
-            printerConnection.write(configLabel);
+            zebra_printerConnection.write(configLabel);
             setStatus("Sending Data", Color.BLUE);
             DemoSleeper.sleep(1500);
-            if (printerConnection instanceof BluetoothConnection) {
-                String friendlyName = ((BluetoothConnection) printerConnection).getFriendlyName();
+            if (zebra_printerConnection instanceof BluetoothConnection) {
+                String friendlyName = ((BluetoothConnection) zebra_printerConnection).getFriendlyName();
                 setStatus(friendlyName, Color.MAGENTA);
                 DemoSleeper.sleep(500);
             }
@@ -934,7 +924,7 @@ public class FineCompleteActivity extends AppCompatActivity implements LocationL
     }
 
     private byte[] getConfigLabel(String Doc) {
-        PrinterLanguage printerLanguage = printer.getPrinterControlLanguage();
+        PrinterLanguage printerLanguage = zebra_printer.getPrinterControlLanguage();
 
         byte[] configLabel = null;
         if (printerLanguage == PrinterLanguage.ZPL) {
@@ -956,14 +946,47 @@ public class FineCompleteActivity extends AppCompatActivity implements LocationL
                         "^FT382,143^A0I,20,19^FH^FD" + GreekConverter("Απ. Σαμανίδη 21 ΤΚ 552 35 ΠΑΝΟΡΑΜΑ") + "^FS" +
                         "^BY2,3,80^FT515,320^BCI,,Y,N" +
                         "^FD>:]>5100760>68[>5150417>64[16]^FS" +
-                        "^FT382,122^A0I,20,19^FH^FD" + GreekConverter("ΤΗΛ: " + munTel1 + " - " + munTel2) + "^FS" +
-                        "^FT382,101^A0I,20,19^FH^FD" + GreekConverter("email: " + munEmail) + "^FS" +
-                        "^FT382,213^A0I,23,24^FH^FD" + GreekConverter(munRegion) + "^FS" +
+                        "^FT382,122^A0I,20,19^FH^FD" + GreekConverter("ΤΗΛ: " + fb_Mun_Tel1 + " - " + fb_Mun_Tel2) + "^FS" +
+                        "^FT382,101^A0I,20,19^FH^FD" + GreekConverter("email: " + fb_Mun_Email) + "^FS" +
+                        "^FT382,213^A0I,23,24^FH^FD" + GreekConverter(fb_Mun_Region) + "^FS" +
                         "^FT339,15^A0I,23,24^FH^FDNo 000000^FS" +
-                        "^FT382,187^A0I,23,24^FH^FD" + GreekConverter(munName) + "^FS" +
-                        "^FT382,165^A0I,20,19^FH^FD" + GreekConverter(munDepartment) + "^FS" +
+                        "^FT382,187^A0I,23,24^FH^FD" + GreekConverter(fb_Mun_Name) + "^FS" +
+                        "^FT382,165^A0I,20,19^FH^FD" + GreekConverter(fb_Mun_Department) + "^FS" +
                         "^FT382,239^A0I,23,24^FH^FD" + GreekConverter("ΕΛΛΗΝΙΚΗ ΔΗΜΟΚΡΑΤΙΑ") + "^FS" +
                         "^PQ1,0,1,Y^XZ";
+
+        String tmpFine2A = "";
+        if (!conA) {
+            tmpFine2A =
+                "^XA" +
+                        "^MMT^PW561^LL0208^LS0" +
+                        "^FO288,160^GFA,02304,02304,00036,:Z64:eJztkrFtAzEMRSmoYBct4JzWSCGcVnJ5hQHL8ABZIWOkCGx5EwZegO5UHMyQd2cDqZPyfil8PDySAljz5ziCE/hvSiJ0LsDh3ORKfabw4SjL0nEC7kJpL3VfYYuR5cYpU+ZnB8gLGSfLUQjaS25CbZdJmnbuM4fxQsZJeLwwDJ0vjocBgXeuwmbhhAMbJ4X30kDuXqVS08deVcfFJwAbZ4NYBtiPWIEjo6NOO/zgQDNOF4J2snEoUjhS58nz4hNha5wuIgyQkvnEiq5GV32dOr7FohwZQxfUp3/zRTgU46hGeXSMIyNuEHbQDb7uGY2jHZw5OE4+yjmZz8ugnMXHkae5k5a58MvmilvzeZ3nqm52Dv2yH/w0n9B+7adNHR1n3jM2r3tGtv3sttOeCdLU6YOXqyjHNz0cBL2l3muwe2U5z/dK4SAHUY5jJxWwxtvj7lmiLJ1y8jMH9P94ys//8+SsWbNmzZp/zQ+x8fJG:AC09" +
+                        "^FO384,0^GFA,03840,03840,00024,:Z64:eJztVzFv20YUfo93vlMghqQKozhHbCQDHTLSaFAoCFCTgMf+gI40DGT22C0n27A9BHFHbx78BzpmpGLAXv0TaAgoOtrtogCC2HcURZ7kjh2KwG/88OHjp/e+e3cC+P+VENi7R9i+lxDHLyFa4I5k/oTB9mQ712mha1xKBIUA0X6aJaOsxsE/BMU0pFmkd3Xe4HwEAfHjLMgSSBtcXBEfUOuB3oO+xU+MPkNt+FGDe+OLCdMeaqXHusEF3zT+yVUQ23xH/GD02aq+5B2jjyO94sfrGj7kj/yvlf6jNM3izPq9wve/FGV/irw4KXTNlz3Ce/c9KLLvZIM/1bwoQL0JZQhupgpdXuOOf9ijARM+U6zl1bgwo0UIIeYB8oYP4rAcGGSC+KLB+bAMKGRcJZY+eFfaBNTwx6c2PykHLDMe7C7p75kDANvk59KfNf75lvEP+zfTjY4/bfx7b6sAed2u7Z8CVx6AWHzT4dZ3RbviixftJf/PS//7GQ/Xlvz7F18oTuQn9E89iy97DwX5upmG0vb/VICySDnKqWDIIRZcYF7i7GTWd/FsKhw8hszxhD+Z80EELmqXMzyCWPo8DCslb9Ai3GOGD+1jtei/MsuHE58HMazxYDHHgT8hvtEfZNA6jpwKT1tBb64/iKF1FLAKz92oOJt6rPj4ivifB07lJ+b9RE45K/hODHyn4jOdiv5wrn9N/HfRgh/weDjXP4rBfV37cZ3c8Mn/AfF/qv0LRlvT+JdI+uuuO4fZjOn3Z9PiLzxhxPeq/oAsUPdOpsXfeIKEu3j7n8zp6ynkqLcKPdIdyKTL6/6wjyWe6TfayhvxBUJEY463KJ+CL/pP64QRrrN8U1PehKr3AytK/P2IcvisyRtNbI7fEf/Z8WCRN/qApITG/QRovtd13gCP/XvyE10Rv3Vd5xPxKDQ+gyHpt3ZqPtMfBkb/zdDw/6j1EXYC47+DRv/7xg/8WfLbJf/Hxj/8ogz+HI3+en2+AH71H4qLmYcF4S/r/tDFKx+K3lQYnPPq/D7VcgmFdMXsP+qP02KKsZmVt3lJzhRKYe23qjxHMZe1D5S3jMtZkLho7bcaV+MWO232W1WMqzu63Zv9tsA/qMtzPL0eLOMCeadDt/vOCt9hp923pP9uRV/i+caGwtbrVT/w6UXbZdZ+W9Tt+hodr2+b81VV/lKyWbPf6kpDifdP++3fSuGtQjq+yd0DveEs3J8oerbne+MHfdO8lyB03YD4ebxJO8Kel6KHG9O/p3uHOrPxQKgE4bc4oR1nv2cGjhoP9fmdph1nzzdgwS7Czwns0nVp4ZGjLmlv7enNJT8qYBsdlh0lsLnsf+B0u05+YPi2fhiYh1v6+ZG+ooeb2z/cpf8jS/7DMFxTwTAerfj3J6H/SQ3zYljYfgDzUEYu/fvCwvbz9dU/d1ZM4w==:AA33" +
+                        "^FT395,6^A0I,23,24^FH^FD" + GreekConverter(A[6]) + "^FS" +
+                        "^FT395,31^A0I,23,24^FH^FD" + GreekConverter(A[5]) + "^FS" +
+                        "^FT395,57^A0I,23,24^FH^FD" + GreekConverter(A[4]) + "^FS" +
+                        "^FT410,83^A0I,23,24^FH^FD" + GreekConverter(A[3]) + "^FS" +
+                        "^FT409,109^A0I,23,24^FH^FD" + GreekConverter(A[2]) + "^FS" +
+                        "^FT409,135^A0I,23,24^FH^FD" + GreekConverter(A[1]) + "^FS" +
+                        "^PQ1,0,1,Y^XZ";
+        }
+
+        String tmpFine2B = "";
+        if (!conB) {
+            tmpFine2B =
+                "^XA" +
+                        "^MMT^PW561^LL0184^LS0" +
+                        "^FO224,128^GFA,02816,02816,00044,:Z64:eJztkzFu3DAQRYdgMZ15AUG8hgqueKXtIiACREHFdtkjJCexaaTY0hcIkAlcuAwXKcJgBTFDUU4ukCrWNASEp6fhzBfAXnu9kUoxqIcbNZbUJ0FGfp+Ij7QYdA1YJ8ku9paSy+wwH1Ffg7FkQ2Yvo+djmA1CDwMJr2d9TWnzxjsbI3tTFNTK0+fsHZY2e1NcvTEtpYmuq6XrWRN64SucHrMXeouuE6ETHirpQr2igl+Srm3UGFpBOk3P2QvRnl0jqZcErXSxXVlJw4y+Niiozqy4Zq8IlvuV3mQv+mO1sugte3VUE9WSVIJb9nKbJ/b6tng7s7IKjJFOzcg3Fl4pGLIX/eHievxaMVv9YS33yuzqFaQ+gCWRZuUOL26RH+8xaP5sE1dWQ91Jj9nLLNZw8MwimBdY2MvszG0fSw/urmNvU7x4D++zF8n8HBP3q2L2tsUrvT7y3cocvPwC2xzMu/GJhbrL/VahsEHFv/OVs/hR5muG6WmivjZ5DnVhIWBAv+2NxCy+lb0Zi5fH0FUmz1fRlgdFr3mwaYryueTB2NPEj0zLeQgbm7emQ8mZTSLia870WfrB95pzxh/evLyjXyW/No15ziW/6jyRdVE9cM6U/5e/zF577bXX/1q/AQNUKDE=:74DE" +
+                        "^FO128,0^GFA,08960,08960,00056,:Z64:eJztmLGLJEUUxt/b6uvuoOktQY4KBhlvQAwMWvZYmuVgq5nlNDQ0rEEQwxUNLliwxl7GDY413Uy4v2DDy+zdNpY1M6xlEgPRBZMJxitfrd5s6CvxQLA/2GAWPn68rldfv34Ag/4nQgGNlagw0idaMFaJE/EPeN0RJrE+EGCEt+VWtC/X4rUuW0f7TlyqXPYi2jfSidRbSbRv16S1EUWkDfFh4GEei2sfGKpPnMXyRKOF7FBG+kAsHZ0fPI/2NR0cAVxF+6wDBXAT7QMNVJyJ9Q0a9IqlJSKMNcz8dVReOyVaawxM/DIqr7VCtFrDp7aJy2uF1joHYF1cXkuELzpNYB2Xu8Tz1lChNtrXWOI1VkTltRJ2FngzG5XXWopuRvECM8AYnlOpmYREmtBbKYanErMTeDuAUTmvimoPHMAeYFReSyXvB959gA8ibMKvVLntAUoI1AjfjRoF32jI60H/ITV0UxvoQVcgD6XEuf+RldfXdmmvbW9dBfWqUuQ7EZbFm97+veQBHvPy2i4pw3owFcAnVY1WMPPaX+QNXOTEg/eJZ1PmfO1bRTwVeD9TfbZk5rVuR1TfKPAOQn2KOV+bdvcj3+8G3sehvpqX13omdhvyBd5UPkL6QGL53KR9Ruf3jM4Plue/IH0gsXJX74iG6msCr5GPERLmfL0nZsSbBZ45v6TzY87Xr4vmAvqmI5/+YY4WLW++fkPc9uevNMi73+bfrr3lzdeFuO3P9yir9Wfgf/edYfkGDfp3RHdKs76RG98dbnt0f/0UtjAs37VvX2z77dWGV2jWHdbYikSMRpt/FOOa4wNxKk63VLn5nezz7mKa4HEq0zvevmP5yhIWabV5P+Bajlk+lUCfyM37SKwVj1cX0D6tX/owS5Tm2LRMoCk2PLEochbP5SW0J5v6MCmKjsVLEpyf3T3PsigtxweiFPb53fmlyT2WjZ5EBlfF5n0k1hmPR/0JbtOfdH68EQG9fQIGo/cvgwa9OslKUd93Gn33JIEpfuN5vrpWq33nDNJtKOESv6ZJhsV7JKvq8FADfpUFHnsf8k5embo2IFKxIN4pdx/yUFVaUeKFtJZTSmym7y1VdXm5XJUFLOoeF+XfW271QFY6SS9uKK0P6imy99eTnHjChbRevN37lrkPke9SfYXQQGn93cHUz5n76/rNs1CfAVXA6feX2DL3GnJ8Rc8z0UBpffx4iuz99fgnOj/15/l9SRP2OdNXfUj9UlG/tNk9nHLna+LVoT9d6M+s7dE6rq86yrQO9+HzDHsc9iGDBg0aNGhQrP4ALU0d9A==:6C7F" +
+                        "^FT151,84^A0I,23,24^FH^FD" + GreekConverter(B[3]) + "^FS" +
+                        "^FT428,7^A0I,23,24^FH^FD" + GreekConverter(B[6]) + "^FS" +
+                        "^FT428,33^A0I,23,24^FH^FD" + GreekConverter(B[5]) + "^FS" +
+                        "^FT377,59^A0I,23,24^FH^FD" + GreekConverter(B[4]) + "^FS" +
+                        "^FT466,85^A0I,23,24^FH^FD" + GreekConverter(B[2]) + "^FS" +
+                        "^FT393,111^A0I,23,24^FH^FD" + GreekConverter(B[1]) + "^FS" +
+                        "^PQ1,0,1,Y^XZ";
+        }
+
         String tmpFine2 =
                 "^XA" +
                         "^MMT^PW561^LL0112^LS0" +
@@ -975,6 +998,40 @@ public class FineCompleteActivity extends AppCompatActivity implements LocationL
                         "^FT409,15^A0I,23,24^FH^FD" + GreekConverter(FineBasic[2]) + "^FS" +
                         "^FT409,39^A0I,23,24^FH^FD" + GreekConverter(FineBasic[0]) + "[" + GreekConverter(FineBasic[10]) + "]" + "^FS" +
                         "^PQ1,0,1,Y^XZ";
+
+        String tmpFine2C = "";
+        if (!conC) {
+            tmpFine2C =
+                    "^XA" +
+                            "^MMT^PW561^LL0200^LS0" +
+                            "^FO128,0^GFA,09984,09984,00052,:Z64:eJztmU9vG0UYxt93ZjUzLdPNlkrNVCx4GxDKcVKqdg9Vk7ZQOPAhNlSiFw6LkAoHBNuN5PpQ0R5zIx+Bb8C6RjGHSPTIgYNFJcTRiIsRlod3vemBQ73j3Ap+lMiWop8ev3929tkYYKWVXmrhEN7HAT7AKoNPq8xy7qxsg0o4pN8uFBkkoyRh3PVYm0+fmAF2gXzycZZz4CZo8+HkUeLcB75LEg5MtTLouhH5ROSDT6keiDvTNgZcN6V60tqnR/WAWpu0+vTFtSF2r5EPHNU+NohbffbE5p7rbjY+xGRCtdlUt+R7A/fgvbqeH7IvOOQyarMpbop3qZ53a58y+ZFBymyrz8fikPp2WNcz3D2ivvE2BuBtVpZYlrXP3sUuh5AnrcxlyWnfeF1Pf1dykJi3MqnEEh7goxnV9iv7+m9XjFqZWOKQ9vonB1D9hu4vh1Urs9JKL5aEC1XrtUfCgcNxZyYres/AFO3XEWnP7U07s7Xx3MdUPgxWXK6bIG7OHbWT+PiA0Expq+fvzdcjL0Zr1Dpvzl6z7ccYhVolYv5BJ/mOF2MNBiaf33/kJCm8mExBt/GR2kSVB4FVblBEWV0PUyby8ilShcw2PrG54MNgFcfIbdM3pU55+UCoGSZ2fl/Q5owXAlJKzJo9kJPQC+GOT2E03zeaT+st/5jBMVbzvV7pP6WdEzDVCZhi4V9vuF9wOzfT9frCoWu0uuNigd+6hZ+Csud1oyadkVLMKCjuuG8Y1EnhxdrBI6ljY/Nca7qYKZPyNYEteZQLpkJjM6MECw1lUvEK4y15VEqnpbE7sZZOUj2Zfl3yWC9kNJ8pbpJKKT7jtY9SJdOLc2IsA40TW1E5AU6oHqsPg5Y8arlSMLEF+dAruFGmyoCZRciORRrMz7YeD72iG+Xx7WBxHq0U9uinrgd72KN6UrWhFufRnQD3j/uG+7KeT6zv6ZY8ymFfifl84LGo+xaqS6olj+L98fEe4Diu5yPj9aglj1L2vK7qfXMjWrl633p04o4W2rgq37ZmKvvUMUv17DodRifIo8nSxEr/X8kYYdfhfbiLRUBHUOXBMMXhDjHFBhahUU0+aPPR9CTLibkz94nbn4NJAYOMQVHcpHvCaWXbnoMbo1ntU7gBFrD+PI+2iB8zJTHnjvNoq0+wPiLmxh4xZwM/H6bWns3o1CmpHtXz8pGoI5pPsStrn6PMx4ehSup63mTEGF+f/bxm3qFfiD70qwf2k3o+l1hdz6bffOCprX3Oz32+9NsDGHWeue1JyB0xqde+AeTrxEzjORPLp17MSis9V2iZZXxkFD/wZoJIWimnse747WgtrUTCtNbKLMxV/1YcWBGL88+f0b20NrFlxF5VyTLMdOvQynOe52ijQF18krBTD/3O0UbCbN2O5NmHXudbo5CZSxuWRX7n2/FHk/bqVSvPHi1Rj2bJWxuGqQ+W6Rvml8/HIvpkmfngQXo61NFmmi7BjNI35DS6tsS+UdxOQ6RYyqslmJVWOoFSXiWM4sGDwa/wqPX7kkZRZ2wFx2o4fIaP2r+XmcumqWUMR8VNyjx+OYSguPbJqyFlEb8cQk9XOikZHhT3KcP5+mTB1qHEqI9DLHzPg0RsPeEYlVD615OLrbsSLwzhlnff0kRsbIiiV8JN//lkwZV7uq8Pyce3HpvoK5dUX5TwZJn5XD5vduUAB/7zMWbztL1Y3q/n49vrzvhamG9h30nn2zfgB2mYbWFxnTvfvq200omktidFZo0SgsO48/3sKw8m3v6jymwUC8nltNOZfenjA7bIEqUEL8NQqNbvnRtltY8WONBSxIFfhq2aeuCZ4kIpLwb7cx8Jnxus/zHrw3Bo6oHrCrqB8qpHgBvZzlRAx6AQXplcsTkzYfCawi6LfJiYbnDz+cBn5COtlw8Ux/V8RH1jyVLzgXo+mPvNxzbzwT0RCjzwYmjf7rrHZ9yf9b7hyGdHgfb6rusp9xuD39eKyotZ6eXSP+Xdr7k=:1044" +
+                            "^FT151,37^A0I,23,24^FH^FD" + GreekConverter(C[7]) + "^FS" +
+                            "^FT379,11^A0I,23,24^FH^FD" + GreekConverter(C[8]) + "^FS" +
+                            "^FT473,37^A0I,23,24^FH^FD" + GreekConverter(C[6]) + "^FS" +
+                            "^FT347,63^A0I,23,24^FH^FD" + GreekConverter(C[5]) + "^FS" +
+                            "^FT398,89^A0I,23,24^FH^FD" + GreekConverter(C[4]) + "^FS" +
+                            "^FT398,115^A0I,23,24^FH^FD" + GreekConverter(C[3]) + "^FS" +
+                            "^FT398,142^A0I,23,24^FH^FD" + GreekConverter(C[2]) + "^FS" +
+                            "^FT398,168^A0I,23,24^FH^FD" + GreekConverter(C[1]) + "^FS" +
+                            "^PQ1,0,1,Y^XZ";
+        }
+
+        String tmpFine2D = "";
+        if (!conD) {
+            tmpFine2D =
+                    "^XA" +
+                            "^MMT^PW561^LL0136^LS0" +
+                            "^FO96,64^GFA,03840,03840,00060,:Z64:eJztkzFu4zAQRYdgwc5zgcS8hgsteSWnUwAhYuAipa6wJ9nQSOEyN1hM4CJdQmOLJWBDs0PJEjb1VgvoQ4VF4Pnrc/4ALFq0aNGiRYv+Myk+01rHCkOG55Dxh/oMxAG5C2fu2PM5Okj4nPlIzhN+V+R5Zk8Da2ALbWzMWr3HxMHwAe4Y2fKvWMHW2MSnVHny6QubyenoTKg10wOu9JGuvkfGHsVuA3nlM1NuPHEWtp8/+pRuiq+w+9SgVXs5ADBPjwJZVG+xhnqtg0p1bSA1KsLNxGriy5hXngdEjjk5ANuxsCvcvXEG7nWAVGV8TE4RXCbWxPYy5hXr1hiOdfF18qMCNGrPCdqLiZBsMorWwqaJxcB5zIvCdoZDS+J70YOv2UVhffElS7iTeyU9sxbqesxroLBPwRffpF/E15pdSAmqquS10ahoVdRxYh1sxNfzkPf8uuuEdaCTPoYN8u4pZAK30YEThuKrCMPErqHaFlbyQnN30Aew4quSeg+VYXm9I1jLl7XJFF9hzeyL4GjwLXnrT/0h75I3w7v49voT7glWtfhe8yrSNN9zuKVrXmFZ/YT7krdRv0Hmq17hWwS7LXlvx3uOar4rLf83z1fYHob5OmBhV+oDfATMX+ab517J/Y3zlV5tW3VRaegVtCDzhR5sBJPKfJvt0CuS86s4I7W9Mx0fmWoPvR77HHrNXS+sD4CyA9LnuvTZ8/PUZyV3H9u+EnYvlfJSiv2wR6FRskXQgA3SPXua9siX03mPpFl9hdJf2V9fYo++TnxZuivj1OTn/f3Ld9GiRf+oPwqslzw=:C5A5" +
+                            "^FO128,0^GFA,01536,01536,00016,:Z64:eJztkbFtwzAQRU/mQU5BCEznThnhSpanKm1GoDfQBiQQIEUKI9kgIxjIAvQm9ARJ6cIAQ0EhRY8gwL/7+Hh8BAmw+mxBeSaDnue+Ae2MJhnM3FtQzKRw5EyQM6QftMl94vvLrtpD6l0oe+KlakunGEiSCMUfPSGJG3/3lPnZ3zLe+DdmV/uVYMp7f3E/8dWF7Ot/+Tk2jgu/sjSA9jQ9wn8XTtqzS49QdgmDU/n/UiRMeygdYUDF9b4/LDw0VxgOFS+u9vyuY+abbfI/Kuvz/Jb47+Pix+T//Fj4Lvm/jou/RdjzCxffdH4Ya789+bG6/z33rCN/ZVVUPw==:DBFC" +
+                            "^FO384,0^GFA,02304,02304,00024,:Z64:eJztlDFrGzEYhj9ZXySFqGcFMmgw+Ar9AepSjnawDKZeM2Y8mqWjxw6FypxxPZh0zZif0VGJTZMOTfMTbuzYMYVgV8udz1VCt0IhLzc9fLz33Hd3AnjMX8ORaoQlcZ0Pv9zlXc1bCZ1LuCZOr2/95armDClKeE2gkytrcVPEKMvgggKkWerZhiOlChZrAKOUb8wnlJ7BIhRnqfZJc554fh4KVLrT7OFrKHvnUwCds4YP52viR+eTwC1u+xdnpZ8DCC8a/cGfGmsH4UZW/emf+x9BzJktf4J65I8Adpzd9hey598BUNfcT/BXyL0JZsQNNz6P2U7O7XuiScTTXnlLZjTiIzMyZBJzyDNDTloxt9oQvop5KQz5eA+30nQLjPn3K7Mu5vFth0vTJ/F8GvrHxSz2Dz7j8em9/mP3OebheftwE/Own7UrY87dXdflMf//4x/g9gHuGiNd8Fpy0u3OkYSr2mfZK70W7aL7aZaQE9a+rebz3IbflxBAJIxJWRWVxgvBCjoTjO4xXZ8PTl1oiWOGElu7qCpOXLbQIlmctARr7U6z6vskoIYKsR8OlZClqr9nl32bJexYUMGY+GKq+b5TX08P8LkmElEM6vnSZVenL5NXgs4SId7U/darw8OnuC9Dv8BntU/w//n2eLoXDi0mxIuN/yi/OepPnnAmUcmDTqfivbLM3HW7WLVXmUjq/QAHuw8DDiN+F56DlPesP33gtTzmH+c3xlKTTQ==:49BA" +
+                            "^FT154,38^A0I,23,24^FH^FD" + GreekConverter(D[3]) + "^FS" +
+                            "^FT154,13^A0I,23,24^FH^FD" + GreekConverter(D[5]) + "^FS" +
+                            "^FT468,38^A0I,23,24^FH^FD" + GreekConverter(D[2]) + "^FS" +
+                            "^FT420,13^A0I,23,24^FH^FD" + GreekConverter(D[4]) + "^FS" +
+                            "^FT404,63^A0I,23,24^FH^FD" + GreekConverter(D[1]) + "^FS" +
+                            "^PQ1,0,1,Y^XZ";
+        }
+
         String tmpFine3 =
                 "^XA" +
                         "^MMT^PW561^LL0264^LS0" +
@@ -1006,7 +1063,7 @@ public class FineCompleteActivity extends AppCompatActivity implements LocationL
                         "^MMT^PW561^LL0230^LS0" +
                         "^FO25,50^A0I,23,24^FH" +
                         "^FB500,7,,J," +
-                        "^FD" + GreekConverter("1. O/H " + OfficerName + " κατέβαλα τον/ην ανωτέρο οδηγό την " + FineBasic[4] + " ημέρα " + FineBasic[6] + " και ώρα " + FineBasic[7] + " στη(ν) " + FineBasic[8] + " να διαπράττει την/τις σημειούμενες με Χ παραβάση/σεις, για τις οποίες σας επιβάλλεται διοικητικό πρόστιμο" ) +
+                        "^FD" + GreekConverter("1. O/H " + fb_User_OfficerName + " κατέβαλα τον/ην ανωτέρο οδηγό την " + FineBasic[4] + " ημέρα " + FineBasic[6] + " και ώρα " + FineBasic[7] + " στη(ν) " + FineBasic[8] + " να διαπράττει την/τις σημειούμενες με Χ παραβάση/σεις, για τις οποίες σας επιβάλλεται διοικητικό πρόστιμο" ) +
                         "^FS" +
                         "^XZ";
 
@@ -1058,10 +1115,10 @@ public class FineCompleteActivity extends AppCompatActivity implements LocationL
                         "^FO33,222^GB27,27,1^FS" +
                         "^FO202,222^GB27,27,1^FS" +
                         "^FO398,222^GB27,27,1^FS" +
-                        "^FT523,56^A0I,20,19^FH^FD" + GreekConverter(munPayAddress3) + "^FS" +
-                        "^FT524,80^A0I,20,19^FH^FD" + GreekConverter(munPayAddress2) + "^FS" +
-                        "^FT525,104^A0I,20,19^FH^FD" + GreekConverter(munPayAddress1) + "^FS" +
-                        "^FT555,128^A0I,20,19^FH^FD" + GreekConverter("Α) στα ταμεία του " + munPayName) + "^FS" +
+                        "^FT523,56^A0I,20,19^FH^FD" + GreekConverter(fb_Mun_PayAddress3) + "^FS" +
+                        "^FT524,80^A0I,20,19^FH^FD" + GreekConverter(fb_Mun_PayAddress2) + "^FS" +
+                        "^FT525,104^A0I,20,19^FH^FD" + GreekConverter(fb_Mun_PayAddress1) + "^FS" +
+                        "^FT555,128^A0I,20,19^FH^FD" + GreekConverter("Α) στα ταμεία του " + fb_Mun_PayName) + "^FS" +
                         "^PQ1,0,1,Y^XZ";
 
         String tmpFine9 =
@@ -1069,7 +1126,7 @@ public class FineCompleteActivity extends AppCompatActivity implements LocationL
                         "^MMT^PW561^LL0170^LS0" +
                         "^FO25,50^A0I,20,19^FH" +
                         "^FB500,5,,J," +
-                        "^FD" + GreekConverter("Γ) Στην " + GreekConverter(munBank) + ", στον λογαριασμό " + GreekConverter(munBankIBAN) + " ή web banking στον ίδιο λογαριασμό. (Να αναγράφεται το ονοματεπώνυμο του οφειλέτη, ο αριθμός κυκλοφορίας του οχήματος και ο αριθμός κλήσης ΚΟΚ)") +
+                        "^FD" + GreekConverter("Γ) Στην " + GreekConverter(fb_Mun_Bank) + ", στον λογαριασμό " + GreekConverter(fb_Mun_BankIBAN) + " ή web banking στον ίδιο λογαριασμό. (Να αναγράφεται το ονοματεπώνυμο του οφειλέτη, ο αριθμός κυκλοφορίας του οχήματος και ο αριθμός κλήσης ΚΟΚ)") +
                         "^FS" +
                         "^XZ";
 
@@ -1089,7 +1146,7 @@ public class FineCompleteActivity extends AppCompatActivity implements LocationL
                         "^FO497,526^GB27,27,1^FS" +
                         "^PQ1,0,1,Y^XZ";
 
-        String fine = tmpFine1 + tmpFine2 + tmpFine3 + tmpFine4 + tmpFine5 + tmpFine6 + tmpFine7 + tmpFine8 + tmpFine9 + tmpFine10;
+        String fine = tmpFine1 + tmpFine2A + tmpFine2B + tmpFine2  + tmpFine2C  + tmpFine2D + tmpFine3 + tmpFine4 + tmpFine5 + tmpFine6 + tmpFine7 + tmpFine8 + tmpFine9 + tmpFine10;
         return fine;
     }
 
@@ -1100,7 +1157,7 @@ public class FineCompleteActivity extends AppCompatActivity implements LocationL
 
          ^XA indicates the beginning of a label
          ^PW sets the width of the label (in dots)
-         ^MNN sets the printer in continuous mode (variable length receipts only make sense with variably sized labels)
+         ^MNN sets the zebra_printer in continuous mode (variable length receipts only make sense with variably sized labels)
          ^LL sets the length of the label (we calculate this value at the end of the routine)
          ^LH sets the reference axis for printing.
             You will notice we change this positioning of the 'Y' axis (length) as we build up the label. Once the positioning is changed, all new fields drawn on the label are rendered as if '0' is the new home position
@@ -1186,7 +1243,7 @@ public class FineCompleteActivity extends AppCompatActivity implements LocationL
                         "^FT527,1244^A0I,20,19^FH^FD\n" + GreekConverter(FineSplitter(95,144, FineBasic[9])) + "^FS\n" +
                         "^FT527,1271^A0I,20,19^FH^FD\n" + GreekConverter(FineSplitter(45,94, FineBasic[9])) + "^FS\n" +
                         "^FT499,1294^A0I,20,19^FH^FD\n" + GreekConverter(FineSplitter(0,44, FineBasic[9])) + "^FS\n" +
-                        "^FT485,1372^A0I,20,19^FH^FD\n" + GreekConverter(OfficerName) + "^FS\n" +
+                        "^FT485,1372^A0I,20,19^FH^FD\n" + GreekConverter(fb_User_OfficerName) + "^FS\n" +
                         "^FT150,1576^A0I,25,24^FH^FD\n" + /*Πληρωμή*/ "^FS\n" +
                         "^FT420,1576^A0I,25,24^FH^FD\n" + GreekConverter(FineBasic[5] + "€") + "^FS\n" +
                         "^FT447,1639^A0I,20,19^FH^FD\n" + GreekConverter(D[3]) + "^FS\n" +
@@ -1205,9 +1262,9 @@ public class FineCompleteActivity extends AppCompatActivity implements LocationL
                         "^FT417,2354^A0I,20,19^FH^FD\n" + GreekConverter(A[2]) + "^FS\n" +
                         "^FT456,2382^A0I,20,19^FH^FD\n" + GreekConverter(A[1]) + "^FS\n" +
                         "^FT431,2415^A0I,20,19^FH^FD\n" + GreekConverter(A[0]) + "^FS\n" +
-                        "^FT325,2686^A0I,23,24^FH^FD\n" + GreekConverter(MunicipalityIndex.toUpperCase()) + "^FS\n" +
-                        "^FT477,2560^A0I,23,24^FH^FD\n" + GreekConverter(MunicipalityShort) + "^FS\n" +
-                        "^FT198,2562^A0I,23,24^FH^FD\n" + GreekConverter(MIDBlanks) + "^FS\n" +
+                        "^FT325,2686^A0I,23,24^FH^FD\n" + GreekConverter(fb_User_MunicipalityIndex.toUpperCase()) + "^FS\n" +
+                        "^FT477,2560^A0I,23,24^FH^FD\n" + GreekConverter(fb_User_MunicipalityShort) + "^FS\n" +
+                        "^FT198,2562^A0I,23,24^FH^FD\n" + GreekConverter(fb_User_MIDBlanks) + "^FS\n" +
                         "^FT366,615^A0I,20,19^FH^FD\n" + /*X5d*/ "^FS\n" +
                         "^FT459,690^A0I,20,19^FH^FD\n" + /*X5c*/ "^FS\n" +
                         "^FT71,715^A0I,20,19^FH^FD\n" + /*X5b*/ "^FS\n" +
@@ -1298,7 +1355,7 @@ public class FineCompleteActivity extends AppCompatActivity implements LocationL
                         "^LL0200\n" +
                         "^LS0\n" +
                         "^FT195,202^BQN,2,8\n" +
-                        "^FH^FDLA,\n" + MID + "/" + DateFirebase + "^FS\n" +
+                        "^FH^FDLA,\n" + fb_User_MID + "/" + DateFirebase + "^FS\n" +
                         "^PQ1,0,1,Y^XZ";
 
 

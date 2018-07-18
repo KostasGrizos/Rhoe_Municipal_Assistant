@@ -105,7 +105,7 @@ public class FineListActivity extends AppCompatActivity {
 
     private String PlateReprint, PlateCountryReprint, ColorReprint, DateReprint, DayReprint, TimeReprint, AddressReprint, FineAmountReprint, FinePointsReprint, TypeReprint, FineTypeReprint, BrandReprint, PaidReprint;
     private String A1 = "", A2 = "", A3 = "", A4 = "", A5 = "", A6 = "", B1 = "", B2 = "", B3 = "", B4 = "", B5 = "", B6 = "", C1 = "", C2 = "", C3 = "", C4 = "", C5 = "", C6 = "", C7 = "", C8 = "", D1 = "", D2 = "", D3 = "", D4 = "", D5 = "";
-
+    private boolean conA = true, conB = true, conC = true, conD = true;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -482,12 +482,12 @@ public class FineListActivity extends AppCompatActivity {
 
     /*
     public void populateListView(final String plt, final boolean mun, final boolean paid, final boolean unpaid) {
-        userDatabaseReference.addValueEventListener(new ValueEventListener() {
+        fb_DataRef_User.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot UdataSnapshot) {
                 showDataFromUser(UdataSnapshot);
 
-                databaseReference.addValueEventListener(new ValueEventListener() {
+                fb_DataRef_Fine.addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         Iterator<DataSnapshot> items = dataSnapshot.getChildren().iterator();
@@ -691,6 +691,39 @@ public class FineListActivity extends AppCompatActivity {
                         "^FT382,165^A0I,20,19^FH^FD" + GreekConverter(munDepartment) + "^FS" +
                         "^FT382,239^A0I,23,24^FH^FD" + GreekConverter("ΕΛΛΗΝΙΚΗ ΔΗΜΟΚΡΑΤΙΑ") + "^FS" +
                         "^PQ1,0,1,Y^XZ";
+
+        String tmpFine2A = "";
+        if (!conA) {
+            tmpFine2A =
+                    "^XA" +
+                            "^MMT^PW561^LL0208^LS0" +
+                            "^FO288,160^GFA,02304,02304,00036,:Z64:eJztkrFtAzEMRSmoYBct4JzWSCGcVnJ5hQHL8ABZIWOkCGx5EwZegO5UHMyQd2cDqZPyfil8PDySAljz5ziCE/hvSiJ0LsDh3ORKfabw4SjL0nEC7kJpL3VfYYuR5cYpU+ZnB8gLGSfLUQjaS25CbZdJmnbuM4fxQsZJeLwwDJ0vjocBgXeuwmbhhAMbJ4X30kDuXqVS08deVcfFJwAbZ4NYBtiPWIEjo6NOO/zgQDNOF4J2snEoUjhS58nz4hNha5wuIgyQkvnEiq5GV32dOr7FohwZQxfUp3/zRTgU46hGeXSMIyNuEHbQDb7uGY2jHZw5OE4+yjmZz8ugnMXHkae5k5a58MvmilvzeZ3nqm52Dv2yH/w0n9B+7adNHR1n3jM2r3tGtv3sttOeCdLU6YOXqyjHNz0cBL2l3muwe2U5z/dK4SAHUY5jJxWwxtvj7lmiLJ1y8jMH9P94ys//8+SsWbNmzZp/zQ+x8fJG:AC09" +
+                            "^FO384,0^GFA,03840,03840,00024,:Z64:eJztVzFv20YUfo93vlMghqQKozhHbCQDHTLSaFAoCFCTgMf+gI40DGT22C0n27A9BHFHbx78BzpmpGLAXv0TaAgoOtrtogCC2HcURZ7kjh2KwG/88OHjp/e+e3cC+P+VENi7R9i+lxDHLyFa4I5k/oTB9mQ712mha1xKBIUA0X6aJaOsxsE/BMU0pFmkd3Xe4HwEAfHjLMgSSBtcXBEfUOuB3oO+xU+MPkNt+FGDe+OLCdMeaqXHusEF3zT+yVUQ23xH/GD02aq+5B2jjyO94sfrGj7kj/yvlf6jNM3izPq9wve/FGV/irw4KXTNlz3Ce/c9KLLvZIM/1bwoQL0JZQhupgpdXuOOf9ijARM+U6zl1bgwo0UIIeYB8oYP4rAcGGSC+KLB+bAMKGRcJZY+eFfaBNTwx6c2PykHLDMe7C7p75kDANvk59KfNf75lvEP+zfTjY4/bfx7b6sAed2u7Z8CVx6AWHzT4dZ3RbviixftJf/PS//7GQ/Xlvz7F18oTuQn9E89iy97DwX5upmG0vb/VICySDnKqWDIIRZcYF7i7GTWd/FsKhw8hszxhD+Z80EELmqXMzyCWPo8DCslb9Ai3GOGD+1jtei/MsuHE58HMazxYDHHgT8hvtEfZNA6jpwKT1tBb64/iKF1FLAKz92oOJt6rPj4ivifB07lJ+b9RE45K/hODHyn4jOdiv5wrn9N/HfRgh/weDjXP4rBfV37cZ3c8Mn/AfF/qv0LRlvT+JdI+uuuO4fZjOn3Z9PiLzxhxPeq/oAsUPdOpsXfeIKEu3j7n8zp6ynkqLcKPdIdyKTL6/6wjyWe6TfayhvxBUJEY463KJ+CL/pP64QRrrN8U1PehKr3AytK/P2IcvisyRtNbI7fEf/Z8WCRN/qApITG/QRovtd13gCP/XvyE10Rv3Vd5xPxKDQ+gyHpt3ZqPtMfBkb/zdDw/6j1EXYC47+DRv/7xg/8WfLbJf/Hxj/8ogz+HI3+en2+AH71H4qLmYcF4S/r/tDFKx+K3lQYnPPq/D7VcgmFdMXsP+qP02KKsZmVt3lJzhRKYe23qjxHMZe1D5S3jMtZkLho7bcaV+MWO232W1WMqzu63Zv9tsA/qMtzPL0eLOMCeadDt/vOCt9hp923pP9uRV/i+caGwtbrVT/w6UXbZdZ+W9Tt+hodr2+b81VV/lKyWbPf6kpDifdP++3fSuGtQjq+yd0DveEs3J8oerbne+MHfdO8lyB03YD4ebxJO8Kel6KHG9O/p3uHOrPxQKgE4bc4oR1nv2cGjhoP9fmdph1nzzdgwS7Czwns0nVp4ZGjLmlv7enNJT8qYBsdlh0lsLnsf+B0u05+YPi2fhiYh1v6+ZG+ooeb2z/cpf8jS/7DMFxTwTAerfj3J6H/SQ3zYljYfgDzUEYu/fvCwvbz9dU/d1ZM4w==:AA33" +
+                            "^FT395,6^A0I,23,24^FH^FD" + GreekConverter(A6) + "^FS" +
+                            "^FT395,31^A0I,23,24^FH^FD" + GreekConverter(A5) + "^FS" +
+                            "^FT395,57^A0I,23,24^FH^FD" + GreekConverter(A4) + "^FS" +
+                            "^FT410,83^A0I,23,24^FH^FD" + GreekConverter(A3) + "^FS" +
+                            "^FT409,109^A0I,23,24^FH^FD" + GreekConverter(A2) + "^FS" +
+                            "^FT409,135^A0I,23,24^FH^FD" + GreekConverter(A1) + "^FS" +
+                            "^PQ1,0,1,Y^XZ";
+        }
+
+        String tmpFine2B = "";
+        if (!conB) {
+            tmpFine2B =
+                    "^XA" +
+                            "^MMT^PW561^LL0184^LS0" +
+                            "^FO224,128^GFA,02816,02816,00044,:Z64:eJztkzFu3DAQRYdgMZ15AUG8hgqueKXtIiACREHFdtkjJCexaaTY0hcIkAlcuAwXKcJgBTFDUU4ukCrWNASEp6fhzBfAXnu9kUoxqIcbNZbUJ0FGfp+Ij7QYdA1YJ8ku9paSy+wwH1Ffg7FkQ2Yvo+djmA1CDwMJr2d9TWnzxjsbI3tTFNTK0+fsHZY2e1NcvTEtpYmuq6XrWRN64SucHrMXeouuE6ETHirpQr2igl+Srm3UGFpBOk3P2QvRnl0jqZcErXSxXVlJw4y+Niiozqy4Zq8IlvuV3mQv+mO1sugte3VUE9WSVIJb9nKbJ/b6tng7s7IKjJFOzcg3Fl4pGLIX/eHievxaMVv9YS33yuzqFaQ+gCWRZuUOL26RH+8xaP5sE1dWQ91Jj9nLLNZw8MwimBdY2MvszG0fSw/urmNvU7x4D++zF8n8HBP3q2L2tsUrvT7y3cocvPwC2xzMu/GJhbrL/VahsEHFv/OVs/hR5muG6WmivjZ5DnVhIWBAv+2NxCy+lb0Zi5fH0FUmz1fRlgdFr3mwaYryueTB2NPEj0zLeQgbm7emQ8mZTSLia870WfrB95pzxh/evLyjXyW/No15ziW/6jyRdVE9cM6U/5e/zF577bXX/1q/AQNUKDE=:74DE" +
+                            "^FO128,0^GFA,08960,08960,00056,:Z64:eJztmLGLJEUUxt/b6uvuoOktQY4KBhlvQAwMWvZYmuVgq5nlNDQ0rEEQwxUNLliwxl7GDY413Uy4v2DDy+zdNpY1M6xlEgPRBZMJxitfrd5s6CvxQLA/2GAWPn68rldfv34Ag/4nQgGNlagw0idaMFaJE/EPeN0RJrE+EGCEt+VWtC/X4rUuW0f7TlyqXPYi2jfSidRbSbRv16S1EUWkDfFh4GEei2sfGKpPnMXyRKOF7FBG+kAsHZ0fPI/2NR0cAVxF+6wDBXAT7QMNVJyJ9Q0a9IqlJSKMNcz8dVReOyVaawxM/DIqr7VCtFrDp7aJy2uF1joHYF1cXkuELzpNYB2Xu8Tz1lChNtrXWOI1VkTltRJ2FngzG5XXWopuRvECM8AYnlOpmYREmtBbKYanErMTeDuAUTmvimoPHMAeYFReSyXvB959gA8ibMKvVLntAUoI1AjfjRoF32jI60H/ITV0UxvoQVcgD6XEuf+RldfXdmmvbW9dBfWqUuQ7EZbFm97+veQBHvPy2i4pw3owFcAnVY1WMPPaX+QNXOTEg/eJZ1PmfO1bRTwVeD9TfbZk5rVuR1TfKPAOQn2KOV+bdvcj3+8G3sehvpqX13omdhvyBd5UPkL6QGL53KR9Ruf3jM4Plue/IH0gsXJX74iG6msCr5GPERLmfL0nZsSbBZ45v6TzY87Xr4vmAvqmI5/+YY4WLW++fkPc9uevNMi73+bfrr3lzdeFuO3P9yir9Wfgf/edYfkGDfp3RHdKs76RG98dbnt0f/0UtjAs37VvX2z77dWGV2jWHdbYikSMRpt/FOOa4wNxKk63VLn5nezz7mKa4HEq0zvevmP5yhIWabV5P+Bajlk+lUCfyM37SKwVj1cX0D6tX/owS5Tm2LRMoCk2PLEochbP5SW0J5v6MCmKjsVLEpyf3T3PsigtxweiFPb53fmlyT2WjZ5EBlfF5n0k1hmPR/0JbtOfdH68EQG9fQIGo/cvgwa9OslKUd93Gn33JIEpfuN5vrpWq33nDNJtKOESv6ZJhsV7JKvq8FADfpUFHnsf8k5embo2IFKxIN4pdx/yUFVaUeKFtJZTSmym7y1VdXm5XJUFLOoeF+XfW271QFY6SS9uKK0P6imy99eTnHjChbRevN37lrkPke9SfYXQQGn93cHUz5n76/rNs1CfAVXA6feX2DL3GnJ8Rc8z0UBpffx4iuz99fgnOj/15/l9SRP2OdNXfUj9UlG/tNk9nHLna+LVoT9d6M+s7dE6rq86yrQO9+HzDHsc9iGDBg0aNGhQrP4ALU0d9A==:6C7F" +
+                            "^FT151,84^A0I,23,24^FH^FD" + GreekConverter(B3) + "^FS" +
+                            "^FT428,7^A0I,23,24^FH^FD" + GreekConverter(B6) + "^FS" +
+                            "^FT428,33^A0I,23,24^FH^FD" + GreekConverter(B5) + "^FS" +
+                            "^FT377,59^A0I,23,24^FH^FD" + GreekConverter(B4) + "^FS" +
+                            "^FT466,85^A0I,23,24^FH^FD" + GreekConverter(B2) + "^FS" +
+                            "^FT393,111^A0I,23,24^FH^FD" + GreekConverter(B1) + "^FS" +
+                            "^PQ1,0,1,Y^XZ";
+        }
+
         String tmpFine2 =
                 "^XA" +
                         "^MMT^PW561^LL0112^LS0" +
@@ -702,6 +735,40 @@ public class FineListActivity extends AppCompatActivity {
                         "^FT409,15^A0I,23,24^FH^FD" + GreekConverter(BrandReprint) + "^FS" +
                         "^FT409,39^A0I,23,24^FH^FD" + GreekConverter(PlateReprint) + "[" + GreekConverter(PlateCountryReprint) + "]" + "^FS" +
                         "^PQ1,0,1,Y^XZ";
+
+        String tmpFine2C = "";
+        if (!conC) {
+            tmpFine2C =
+                    "^XA" +
+                            "^MMT^PW561^LL0200^LS0" +
+                            "^FO128,0^GFA,09984,09984,00052,:Z64:eJztmU9vG0UYxt93ZjUzLdPNlkrNVCx4GxDKcVKqdg9Vk7ZQOPAhNlSiFw6LkAoHBNuN5PpQ0R5zIx+Bb8C6RjGHSPTIgYNFJcTRiIsRlod3vemBQ73j3Ap+lMiWop8ev3929tkYYKWVXmrhEN7HAT7AKoNPq8xy7qxsg0o4pN8uFBkkoyRh3PVYm0+fmAF2gXzycZZz4CZo8+HkUeLcB75LEg5MtTLouhH5ROSDT6keiDvTNgZcN6V60tqnR/WAWpu0+vTFtSF2r5EPHNU+NohbffbE5p7rbjY+xGRCtdlUt+R7A/fgvbqeH7IvOOQyarMpbop3qZ53a58y+ZFBymyrz8fikPp2WNcz3D2ivvE2BuBtVpZYlrXP3sUuh5AnrcxlyWnfeF1Pf1dykJi3MqnEEh7goxnV9iv7+m9XjFqZWOKQ9vonB1D9hu4vh1Urs9JKL5aEC1XrtUfCgcNxZyYres/AFO3XEWnP7U07s7Xx3MdUPgxWXK6bIG7OHbWT+PiA0Expq+fvzdcjL0Zr1Dpvzl6z7ccYhVolYv5BJ/mOF2MNBiaf33/kJCm8mExBt/GR2kSVB4FVblBEWV0PUyby8ilShcw2PrG54MNgFcfIbdM3pU55+UCoGSZ2fl/Q5owXAlJKzJo9kJPQC+GOT2E03zeaT+st/5jBMVbzvV7pP6WdEzDVCZhi4V9vuF9wOzfT9frCoWu0uuNigd+6hZ+Csud1oyadkVLMKCjuuG8Y1EnhxdrBI6ljY/Nca7qYKZPyNYEteZQLpkJjM6MECw1lUvEK4y15VEqnpbE7sZZOUj2Zfl3yWC9kNJ8pbpJKKT7jtY9SJdOLc2IsA40TW1E5AU6oHqsPg5Y8arlSMLEF+dAruFGmyoCZRciORRrMz7YeD72iG+Xx7WBxHq0U9uinrgd72KN6UrWhFufRnQD3j/uG+7KeT6zv6ZY8ymFfifl84LGo+xaqS6olj+L98fEe4Diu5yPj9aglj1L2vK7qfXMjWrl633p04o4W2rgq37ZmKvvUMUv17DodRifIo8nSxEr/X8kYYdfhfbiLRUBHUOXBMMXhDjHFBhahUU0+aPPR9CTLibkz94nbn4NJAYOMQVHcpHvCaWXbnoMbo1ntU7gBFrD+PI+2iB8zJTHnjvNoq0+wPiLmxh4xZwM/H6bWns3o1CmpHtXz8pGoI5pPsStrn6PMx4ehSup63mTEGF+f/bxm3qFfiD70qwf2k3o+l1hdz6bffOCprX3Oz32+9NsDGHWeue1JyB0xqde+AeTrxEzjORPLp17MSis9V2iZZXxkFD/wZoJIWimnse747WgtrUTCtNbKLMxV/1YcWBGL88+f0b20NrFlxF5VyTLMdOvQynOe52ijQF18krBTD/3O0UbCbN2O5NmHXudbo5CZSxuWRX7n2/FHk/bqVSvPHi1Rj2bJWxuGqQ+W6Rvml8/HIvpkmfngQXo61NFmmi7BjNI35DS6tsS+UdxOQ6RYyqslmJVWOoFSXiWM4sGDwa/wqPX7kkZRZ2wFx2o4fIaP2r+XmcumqWUMR8VNyjx+OYSguPbJqyFlEb8cQk9XOikZHhT3KcP5+mTB1qHEqI9DLHzPg0RsPeEYlVD615OLrbsSLwzhlnff0kRsbIiiV8JN//lkwZV7uq8Pyce3HpvoK5dUX5TwZJn5XD5vduUAB/7zMWbztL1Y3q/n49vrzvhamG9h30nn2zfgB2mYbWFxnTvfvq200omktidFZo0SgsO48/3sKw8m3v6jymwUC8nltNOZfenjA7bIEqUEL8NQqNbvnRtltY8WONBSxIFfhq2aeuCZ4kIpLwb7cx8Jnxus/zHrw3Bo6oHrCrqB8qpHgBvZzlRAx6AQXplcsTkzYfCawi6LfJiYbnDz+cBn5COtlw8Ux/V8RH1jyVLzgXo+mPvNxzbzwT0RCjzwYmjf7rrHZ9yf9b7hyGdHgfb6rusp9xuD39eKyotZ6eXSP+Xdr7k=:1044" +
+                            "^FT151,37^A0I,23,24^FH^FD" + GreekConverter(C7) + "^FS" +
+                            "^FT379,11^A0I,23,24^FH^FD" + GreekConverter(C8) + "^FS" +
+                            "^FT473,37^A0I,23,24^FH^FD" + GreekConverter(C6) + "^FS" +
+                            "^FT347,63^A0I,23,24^FH^FD" + GreekConverter(C5) + "^FS" +
+                            "^FT398,89^A0I,23,24^FH^FD" + GreekConverter(C4) + "^FS" +
+                            "^FT398,115^A0I,23,24^FH^FD" + GreekConverter(C3) + "^FS" +
+                            "^FT398,142^A0I,23,24^FH^FD" + GreekConverter(C2) + "^FS" +
+                            "^FT398,168^A0I,23,24^FH^FD" + GreekConverter(C1) + "^FS" +
+                            "^PQ1,0,1,Y^XZ";
+        }
+
+        String tmpFine2D = "";
+        if (!conD) {
+            tmpFine2D =
+                    "^XA" +
+                            "^MMT^PW561^LL0136^LS0" +
+                            "^FO96,64^GFA,03840,03840,00060,:Z64:eJztkzFu4zAQRYdgwc5zgcS8hgsteSWnUwAhYuAipa6wJ9nQSOEyN1hM4CJdQmOLJWBDs0PJEjb1VgvoQ4VF4Pnrc/4ALFq0aNGiRYv+Myk+01rHCkOG55Dxh/oMxAG5C2fu2PM5Okj4nPlIzhN+V+R5Zk8Da2ALbWzMWr3HxMHwAe4Y2fKvWMHW2MSnVHny6QubyenoTKg10wOu9JGuvkfGHsVuA3nlM1NuPHEWtp8/+pRuiq+w+9SgVXs5ADBPjwJZVG+xhnqtg0p1bSA1KsLNxGriy5hXngdEjjk5ANuxsCvcvXEG7nWAVGV8TE4RXCbWxPYy5hXr1hiOdfF18qMCNGrPCdqLiZBsMorWwqaJxcB5zIvCdoZDS+J70YOv2UVhffElS7iTeyU9sxbqesxroLBPwRffpF/E15pdSAmqquS10ahoVdRxYh1sxNfzkPf8uuuEdaCTPoYN8u4pZAK30YEThuKrCMPErqHaFlbyQnN30Aew4quSeg+VYXm9I1jLl7XJFF9hzeyL4GjwLXnrT/0h75I3w7v49voT7glWtfhe8yrSNN9zuKVrXmFZ/YT7krdRv0Hmq17hWwS7LXlvx3uOar4rLf83z1fYHob5OmBhV+oDfATMX+ab517J/Y3zlV5tW3VRaegVtCDzhR5sBJPKfJvt0CuS86s4I7W9Mx0fmWoPvR77HHrNXS+sD4CyA9LnuvTZ8/PUZyV3H9u+EnYvlfJSiv2wR6FRskXQgA3SPXua9siX03mPpFl9hdJf2V9fYo++TnxZuivj1OTn/f3Ld9GiRf+oPwqslzw=:C5A5" +
+                            "^FO128,0^GFA,01536,01536,00016,:Z64:eJztkbFtwzAQRU/mQU5BCEznThnhSpanKm1GoDfQBiQQIEUKI9kgIxjIAvQm9ARJ6cIAQ0EhRY8gwL/7+Hh8BAmw+mxBeSaDnue+Ae2MJhnM3FtQzKRw5EyQM6QftMl94vvLrtpD6l0oe+KlakunGEiSCMUfPSGJG3/3lPnZ3zLe+DdmV/uVYMp7f3E/8dWF7Ot/+Tk2jgu/sjSA9jQ9wn8XTtqzS49QdgmDU/n/UiRMeygdYUDF9b4/LDw0VxgOFS+u9vyuY+abbfI/Kuvz/Jb47+Pix+T//Fj4Lvm/jou/RdjzCxffdH4Ya789+bG6/z33rCN/ZVVUPw==:DBFC" +
+                            "^FO384,0^GFA,02304,02304,00024,:Z64:eJztlDFrGzEYhj9ZXySFqGcFMmgw+Ar9AepSjnawDKZeM2Y8mqWjxw6FypxxPZh0zZif0VGJTZMOTfMTbuzYMYVgV8udz1VCt0IhLzc9fLz33Hd3AnjMX8ORaoQlcZ0Pv9zlXc1bCZ1LuCZOr2/95armDClKeE2gkytrcVPEKMvgggKkWerZhiOlChZrAKOUb8wnlJ7BIhRnqfZJc554fh4KVLrT7OFrKHvnUwCds4YP52viR+eTwC1u+xdnpZ8DCC8a/cGfGmsH4UZW/emf+x9BzJktf4J65I8Adpzd9hey598BUNfcT/BXyL0JZsQNNz6P2U7O7XuiScTTXnlLZjTiIzMyZBJzyDNDTloxt9oQvop5KQz5eA+30nQLjPn3K7Mu5vFth0vTJ/F8GvrHxSz2Dz7j8em9/mP3OebheftwE/Own7UrY87dXdflMf//4x/g9gHuGiNd8Fpy0u3OkYSr2mfZK70W7aL7aZaQE9a+rebz3IbflxBAJIxJWRWVxgvBCjoTjO4xXZ8PTl1oiWOGElu7qCpOXLbQIlmctARr7U6z6vskoIYKsR8OlZClqr9nl32bJexYUMGY+GKq+b5TX08P8LkmElEM6vnSZVenL5NXgs4SId7U/darw8OnuC9Dv8BntU/w//n2eLoXDi0mxIuN/yi/OepPnnAmUcmDTqfivbLM3HW7WLVXmUjq/QAHuw8DDiN+F56DlPesP33gtTzmH+c3xlKTTQ==:49BA" +
+                            "^FT154,38^A0I,23,24^FH^FD" + GreekConverter(D3) + "^FS" +
+                            "^FT154,13^A0I,23,24^FH^FD" + GreekConverter(D5) + "^FS" +
+                            "^FT468,38^A0I,23,24^FH^FD" + GreekConverter(D2) + "^FS" +
+                            "^FT420,13^A0I,23,24^FH^FD" + GreekConverter(D4) + "^FS" +
+                            "^FT404,63^A0I,23,24^FH^FD" + GreekConverter(D1) + "^FS" +
+                            "^PQ1,0,1,Y^XZ";
+        }
+
         String tmpFine3 =
                 "^XA" +
                         "^MMT^PW561^LL0264^LS0" +
@@ -1294,6 +1361,7 @@ public class FineListActivity extends AppCompatActivity {
                 A4 = RInfo.getA4();
                 A5 = RInfo.getA5();
                 A6 = RInfo.getA6();
+                conA = false;
             }
             if (dataSnapshot.hasChild("Fine B")) {
                 RInfo.setB1(dataSnapshot.child("Fine B").getValue(RetrieveFineInfoFirebase.class).getB1());
@@ -1308,6 +1376,7 @@ public class FineListActivity extends AppCompatActivity {
                 B4 = RInfo.getB4();
                 B5 = RInfo.getB5();
                 B6 = RInfo.getB6();
+                conB = false;
             }
             if (dataSnapshot.hasChild("Fine C")) {
                 RInfo.setC1(dataSnapshot.child("Fine C").getValue(RetrieveFineInfoFirebase.class).getC1());
@@ -1326,6 +1395,7 @@ public class FineListActivity extends AppCompatActivity {
                 C6 = RInfo.getC6();
                 C7 = RInfo.getC7();
                 C8 = RInfo.getC8();
+                conC = false;
             }
             if (dataSnapshot.hasChild("Fine C")) {
                 RInfo.setD1(dataSnapshot.child("Fine D").getValue(RetrieveFineInfoFirebase.class).getD1());
@@ -1338,6 +1408,7 @@ public class FineListActivity extends AppCompatActivity {
                 D3 = RInfo.getD3();
                 D4 = RInfo.getD4();
                 D5 = RInfo.getD5();
+                conD = false;
             }
         }
     }
