@@ -10,7 +10,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.example.android.rhoe_app_1.OCRActivity">
+    tools:context="com.example.android.rhoe_app_1.CarFinePhotoActivity">
 
     <SurfaceView
         android:id="@+id/surface_view1"
@@ -54,7 +54,7 @@
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/btnCancelOCR"
+            android:id="@+id/btnCancelPhoto"
             style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -65,7 +65,7 @@
             android:text="ΑΚΥΡΩΣΗ" />
 
         <Button
-            android:id="@+id/btnConfirmOCR"
+            android:id="@+id/btnTakePhoto"
             style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -73,7 +73,7 @@
             android:layout_weight="0.5"
             android:background="@drawable/button_background"
             android:backgroundTint="@color/colorAccent"
-            android:text="ΕΠΙΒΕΒΑΙΩΣΗ" />
+            android:text="ΛΗΨΗ" />
 
     </LinearLayout>
 
