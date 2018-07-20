@@ -43,7 +43,7 @@ public class DashboardActivity extends AppCompatActivity {
 
     private FirebaseAuth firebaseAuth;
     private DatabaseReference databaseReference;
-    private String userID;
+    private String userID, MID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,8 +111,6 @@ public class DashboardActivity extends AppCompatActivity {
         AnalyticsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(DashboardActivity.this, CarFinePhotoActivity.class);
-                startActivity(intent);
             }
         });
 
@@ -128,10 +126,10 @@ public class DashboardActivity extends AppCompatActivity {
         NewFineButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Bundle conOCR = new Bundle();
-                conOCR.putBoolean("ConditionOCR", true);
-                Intent intent = new Intent(DashboardActivity.this, FineCompleteActivity.class);
-                intent.putExtras(conOCR);
+                Bundle bMID = new Bundle();
+                bMID.putString("ConMID", MID);
+                Intent intent = new Intent(DashboardActivity.this, CarFinePhotoActivity.class);
+                intent.putExtras(bMID);
                 startActivity(intent);
             }
         });
@@ -162,6 +160,7 @@ public class DashboardActivity extends AppCompatActivity {
             SurnameText.setText(RUInfo.getLname());
             MunicipalityText.setText(RUInfo.getMunicipality());
             MunicipalIDText.setText(RUInfo.getMID());
+            MID = RUInfo.getMID();
         }
     }
 

@@ -147,6 +147,8 @@ public class FineCompleteActivity extends AppCompatActivity implements LocationL
         setContentView(R.layout.activity_fine_complete);
 
         //OCR-Extra Bundles
+        Bundle bTimestamp = this.getIntent().getExtras();
+        DateFirebase = bTimestamp.getString("ConTimestamp");
         Bundle conOCR = this.getIntent().getExtras();
         final boolean ConditionOCR = conOCR.getBoolean("ConditionOCR");
         final Bundle OCRResultB = this.getIntent().getExtras();
@@ -528,9 +530,9 @@ public class FineCompleteActivity extends AppCompatActivity implements LocationL
         //simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT+2"));
         Date = simpleDateFormat.format(calendar.getTime());
 
-        simpleDateFirebaseFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss:SSSZ");
+        //simpleDateFirebaseFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss:SSSZ");
         //simpleDateFirebaseFormat.setTimeZone(TimeZone.getTimeZone("GMT+2"));
-        DateFirebase = simpleDateFirebaseFormat.format(calendar.getTime());
+        //DateFirebase = simpleDateFirebaseFormat.format(calendar.getTime());
 
         simpleTimeFormat = new SimpleDateFormat("HH:mm");
         //simpleTimeFormat.setTimeZone(TimeZone.getTimeZone("GMT+2"));

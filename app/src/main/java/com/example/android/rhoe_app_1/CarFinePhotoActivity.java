@@ -1,6 +1,7 @@
 package com.example.android.rhoe_app_1;
 
 import android.Manifest;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -8,28 +9,17 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Camera;
 import android.graphics.Matrix;
-import android.graphics.PixelFormat;
-import android.net.Uri;
+import android.icu.text.SimpleDateFormat;
+import android.icu.util.TimeZone;
+import android.os.Build;
+import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
-
-import com.example.android.app_v12.R;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.vision.CameraSource;
-import com.google.android.gms.vision.Detector;
-import com.google.android.gms.vision.text.TextBlock;
-import com.google.android.gms.vision.text.TextRecognizer;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
-
-import android.os.Bundle;
 import android.util.Log;
-import android.util.SparseArray;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -37,11 +27,25 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.example.android.app_v12.R;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.vision.CameraSource;
+import com.google.android.gms.vision.text.TextRecognizer;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Locale;
 
 public class CarFinePhotoActivity extends AppCompatActivity {
 
@@ -55,18 +59,13 @@ public class CarFinePhotoActivity extends AppCompatActivity {
     Button TakePhotoButton, CancelPhotoButton;
     boolean cameraOn;
 
-    private SurfaceHolder camHolder;
-    private boolean previewRunning;
-    final Context context = this;
-    public static Camera camera = null;
-    private RelativeLayout CamView;
-    private Bitmap inputBMP = null, bmp, bmp1;
-    private ImageView mImage;
     byte[] bitmapdata;
-    View rootView;
 
-    private Bitmap image;
     FirebaseStorage storage = FirebaseStorage.getInstance();
+
+    android.icu.util.Calendar calendar;
+    SimpleDateFormat simpleDatePhotoFirebaseFormat;
+    String DatePhotoFirebase;
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -100,16 +99,19 @@ public class CarFinePhotoActivity extends AppCompatActivity {
         TakePhotoButton = (Button) findViewById(R.id.btnTakePhoto);
         CancelPhotoButton = (Button) findViewById(R.id.btnCancelPhoto);
 
+        Bundle bMID = this.getIntent().getExtras();
+        final String MID = bMID.getString("ConMID");
+
         final int REQUEST_IMAGE_CAPTURE = 1;
 
-        StorageReference storageRef = storage.getReferenceFromUrl("gs://testproject-328af.appspot.com/");
-        final StorageReference CarFineImagesRef = storageRef.child("Test/" + "test" + ".jpg");
+        final StorageReference storageRef = storage.getReferenceFromUrl("gs://testproject-328af.appspot.com/");
 
         textRecognizer = new TextRecognizer.Builder(getApplicationContext()).build();
 
         turnCameraOn();
 
         TakePhotoButton.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public void onClick(View v) {
                 if (cameraOn) {
@@ -123,7 +125,9 @@ public class CarFinePhotoActivity extends AppCompatActivity {
                     bitmapdata = baos.toByteArray();
                     ByteArrayInputStream fis = new ByteArrayInputStream(bitmapdata);
                     */
-                    rootView = cameraView;
+                    //rootView = cameraView;
+
+                    /*
                     rootView.setDrawingCacheEnabled(true);
                     rootView.buildDrawingCache(true);
                     Bitmap bmp = Bitmap.createBitmap(rootView.getDrawingCache());
@@ -132,12 +136,11 @@ public class CarFinePhotoActivity extends AppCompatActivity {
                     bmp.compress(Bitmap.CompressFormat.JPEG, 100, baos);
                     bitmapdata = baos.toByteArray();
                     ByteArrayInputStream fis = new ByteArrayInputStream(bitmapdata);
-
-                    cameraSource.stop();
-                    cameraOn = false;
-                    TakePhotoButton.setText("ΣΥΝΕΧΕΙΑ");
-                    CancelPhotoButton.setText("ΕΠΑΝΑΛΗΨΗ");
+                    */
+                    takePicture();
                 } else {
+                    getTimestamp();
+                    final StorageReference CarFineImagesRef = storageRef.child(MID + "/CarFines/" + DatePhotoFirebase + ".jpg");
                     UploadTask uploadTask = CarFineImagesRef.putBytes(bitmapdata);
                     uploadTask.addOnFailureListener(new OnFailureListener() {
                         @Override
@@ -151,7 +154,14 @@ public class CarFinePhotoActivity extends AppCompatActivity {
                             //Uri downloadUrl = taskSnapshot.getDownloadUrl();
                         }
                     });
-                    Intent intent = new Intent(CarFinePhotoActivity.this, DashboardActivity.class);
+
+                    Bundle conOCR = new Bundle();
+                    conOCR.putBoolean("ConditionOCR", true);
+                    Bundle bTimestamp = new Bundle();
+                    bTimestamp.putString("ConTimestamp", DatePhotoFirebase);
+                    Intent intent = new Intent(CarFinePhotoActivity.this, FineCompleteActivity.class);
+                    intent.putExtras(conOCR);
+                    intent.putExtras(bTimestamp);
                     startActivity(intent);
                 }
                 /*
@@ -180,10 +190,7 @@ public class CarFinePhotoActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (cameraOn) {
-                    Bundle conOCR = new Bundle();
-                    conOCR.putBoolean("ConditionOCR", false);
                     Intent intent = new Intent(CarFinePhotoActivity.this, DashboardActivity.class);
-                    intent.putExtras(conOCR);
                     startActivity(intent);
                 } else {
                     try {
@@ -250,86 +257,38 @@ public class CarFinePhotoActivity extends AppCompatActivity {
             });
         }
     }
-    /*
+
     private void takePicture() {
         try{
             cameraSource.takePicture(null, new CameraSource.PictureCallback() {
-
-                private File imageFile;
                 @Override
                 public void onPictureTaken(byte[] bytes) {
                     try {
-                        // convert byte array into bitmap
                         Bitmap loadedImage = null;
-                        Bitmap rotatedBitmap = null;
                         loadedImage = BitmapFactory.decodeByteArray(bytes, 0,
                                 bytes.length);
-
-                        // rotate Image
-                        Matrix rotateMatrix = new Matrix();
-                        rotateMatrix.postRotate(rotation);
-                        rotatedBitmap = Bitmap.createBitmap(loadedImage, 0, 0,
-                                loadedImage.getWidth(), loadedImage.getHeight(),
-                                rotateMatrix, false);
-                        String state = Environment.getExternalStorageState();
-                        File folder = null;
-                        if (state.contains(Environment.MEDIA_MOUNTED)) {
-                            folder = new File(Environment
-                                    .getExternalStorageDirectory() + "/Demo");
-                        } else {
-                            folder = new File(Environment
-                                    .getExternalStorageDirectory() + "/Demo");
-                        }
-
-                        boolean success = true;
-                        if (!folder.exists()) {
-                            success = folder.mkdirs();
-                        }
-                        if (success) {
-                            java.util.Date date = new java.util.Date();
-                            imageFile = new File(folder.getAbsolutePath()
-                                    + File.separator
-                                    //+ new Timestamp(date.getTime()).toString()
-                                    + "Image.jpg");
-
-                            imageFile.createNewFile();
-                        } else {
-                            Toast.makeText(getBaseContext(), "Image Not saved",
-                                    Toast.LENGTH_SHORT).show();
-                            return;
-                        }
-
                         ByteArrayOutputStream ostream = new ByteArrayOutputStream();
-
-                        // save image into gallery
-                        rotatedBitmap = resize(rotatedBitmap, 800, 600);
-                        rotatedBitmap.compress(CompressFormat.JPEG, 100, ostream);
-
-                        FileOutputStream fout = new FileOutputStream(imageFile);
-                        fout.write(ostream.toByteArray());
-                        fout.close();
-                        ContentValues values = new ContentValues();
-
-                        values.put(Images.Media.DATE_TAKEN,
-                                System.currentTimeMillis());
-                        values.put(Images.Media.MIME_TYPE, "image/jpeg");
-                        values.put(MediaStore.MediaColumns.DATA,
-                                imageFile.getAbsolutePath());
-
-                        CustomCamaraActivity.this.getContentResolver().insert(
-                                Images.Media.EXTERNAL_CONTENT_URI, values);
-
-                        setResult(Activity.RESULT_OK); //add this
-                        finish();
+                        loadedImage.compress(Bitmap.CompressFormat.JPEG, 100, ostream);
+                        bitmapdata = ostream.toByteArray();
+                        cameraSource.stop();
+                        cameraOn = false;
+                        TakePhotoButton.setText("ΣΥΝΕΧΕΙΑ");
+                        CancelPhotoButton.setText("ΕΠΑΝΑΛΗΨΗ");
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
             });
-
         }catch (Exception ex){
-            txTextoCapturado.setText("Error al capturar fotografia!");
+            textView.setText("Σφάλμα κατά την λήψη φωτογραφίας!");
         }
     }
-    */
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    private void getTimestamp() {
+        calendar = android.icu.util.Calendar.getInstance(TimeZone.getTimeZone("EET"));
+
+        simpleDatePhotoFirebaseFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss:SSSZ");
+        DatePhotoFirebase = simpleDatePhotoFirebaseFormat.format(calendar.getTime());
+
+    }
 }
