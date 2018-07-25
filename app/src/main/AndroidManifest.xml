@@ -56,7 +56,8 @@
         <activity android:name="com.example.android.rhoe_app_1.AnalyticsActivity" />
         <activity android:name="com.example.android.rhoe_app_1.FineCompleteActivity" />
         <!-- activity android:name="com.example.android.rhoe_app_1.ListAdapterActivity"></activity -->
-        <activity android:name="com.example.android.rhoe_app_1.CarFinePhotoActivity"></activity>
+        <activity android:name="com.example.android.rhoe_app_1.CarFinePhotoActivity" />
+        <activity android:name="com.example.android.rhoe_app_1.CleanlinessFineActivity"></activity>
     </application>
 
 </manifest>

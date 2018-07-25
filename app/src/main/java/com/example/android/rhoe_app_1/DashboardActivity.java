@@ -111,6 +111,8 @@ public class DashboardActivity extends AppCompatActivity {
         AnalyticsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Intent intent = new Intent(DashboardActivity.this, CleanlinessFineActivity.class);
+                startActivity(intent);
             }
         });
 
