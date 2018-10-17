@@ -71,7 +71,7 @@ import org.json.JSONObject;
 import java.util.Arrays;
 import java.util.Locale;
 
-public class FineCompleteActivity extends AppCompatActivity implements LocationListener {
+public class FineCompleteActivity extends AppCompatActivity implements LocationListener{
 
     //Database
     DatabaseReference fb_DataRef_Fine, fb_DataRef_User, fb_DataRef_Municipality, fb_DataRef_FineTemp;
@@ -127,7 +127,7 @@ public class FineCompleteActivity extends AppCompatActivity implements LocationL
 
             return;
         }
-        locationManager.requestLocationUpdates(provider, 20000, 1, this);
+        locationManager.requestLocationUpdates(provider, 1000, 0, this);
     }
 
     @Override
@@ -554,9 +554,16 @@ public class FineCompleteActivity extends AppCompatActivity implements LocationL
             return;
         }
         Location myLocation = locationManager.getLastKnownLocation(provider);
-        lat = myLocation.getLatitude();
-        lng = myLocation.getLongitude();
-        new GetAddress().execute(String.format("%.4f,%.4f",lat,lng));
+        if (myLocation != null) {
+            lat = myLocation.getLatitude();
+            lng = myLocation.getLongitude();
+            new GetAddress().execute(String.format("%.4f,%.4f",lat,lng));
+        }
+        else{
+            //This is what you need:
+            locationManager.requestLocationUpdates(provider, 1000, 0, this);
+        }
+
     }
 
     private void checkSection(boolean condition, TableLayout table){
@@ -801,7 +808,8 @@ public class FineCompleteActivity extends AppCompatActivity implements LocationL
                 double lng = Double.parseDouble(strings[0].split(",")[1]);
                 String response;
                 HttpDataHandler http = new HttpDataHandler();
-                @SuppressLint("DefaultLocale") String url = String.format("https://maps.googleapis.com/maps/api/geocode/json?latlng=%.4f,%.4f&sensor=false&language=el",lat,lng);
+                //String url = String.format("https://maps.googleapis.com/maps/api/geocode/json?latlng=%.4f,%.4f&sensor=false&language=el",lat,lng);
+                String url = String.format("https://maps.googleapis.com/maps/api/geocode/json?latlng=%.4f,%.4f&sensor=false",lat,lng);
                 response = http.GetHTTPData(url);
                 return response;
             }
@@ -812,10 +820,10 @@ public class FineCompleteActivity extends AppCompatActivity implements LocationL
         @Override
         protected void onPostExecute(String s) {
             try{
+                Log.e("ERROR","ErrorLocation: " + s);
                 JSONObject jsonObject = new JSONObject(s);
 
                 String address = ((JSONArray)jsonObject.get("results")).getJSONObject(0).get("formatted_address").toString();
-                Log.d("ADebugTag", "Value: " + address);
                 LocationEditText.setText(address);
                 latF = lat;
                 lonF = lng;
