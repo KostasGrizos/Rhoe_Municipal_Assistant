@@ -9,13 +9,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.android.app_v12.R;
 import com.example.android.rhoe_app_1.FirebaseUsers.RetrieveUserInfoFirebase;
-import com.example.android.rhoe_app_1.FirebaseUsers.UserBluetoothInfoFirebase;
-import com.example.android.rhoe_app_1.FirebaseUsers.UserInfoFirebase;
-import com.example.android.rhoe_app_1.Zebra.BluetoothDiscovery;
 import com.example.android.rhoe_app_1.Zebra.SettingsHelper;
 import com.example.android.rhoe_app_1.Zebra.DemoSleeper;
 import com.google.firebase.auth.FirebaseAuth;

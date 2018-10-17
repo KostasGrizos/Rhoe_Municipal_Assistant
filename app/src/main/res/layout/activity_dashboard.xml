@@ -10,7 +10,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="0.25"
+        android:layout_weight="0.2"
         android:orientation="horizontal">
 
         <ImageView
@@ -67,123 +67,199 @@
         </android.support.constraint.ConstraintLayout>
     </LinearLayout>
 
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.1">
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:text="Χρήστης:"
+            android:textColor="@android:color/black"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/txtNameView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            app:layout_constraintStart_toEndOf="@+id/textView2"
+            app:layout_constraintTop_toTopOf="@+id/textView2" />
+
+        <TextView
+            android:id="@+id/txtSurnameView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            app:layout_constraintStart_toEndOf="@+id/txtNameView"
+            app:layout_constraintTop_toTopOf="@+id/txtNameView" />
+
+        <ImageButton
+            android:id="@+id/btnLogout"
+            style="@android:style/Widget.DeviceDefault.ImageButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginTop="8dp"
+            android:backgroundTint="@android:color/transparent"
+            android:scaleType="fitCenter"
+            android:scaleX="1.5"
+            android:scaleY="1.5"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@mipmap/logout" />
+
+        <ImageButton
+            android:id="@+id/btnViewUsers"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_weight="1"
+            android:backgroundTint="@android:color/transparent"
+            android:scaleType="fitCenter"
+            android:scaleX="1.5"
+            android:scaleY="1.5"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/btnSettings"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@mipmap/team" />
+
+        <ImageButton
+            android:id="@+id/btnSettings"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginTop="8dp"
+            android:backgroundTint="@android:color/transparent"
+            android:scaleType="fitCenter"
+            android:scaleX="1.5"
+            android:scaleY="1.5"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/btnLogout"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@mipmap/settings" />
+
+    </android.support.constraint.ConstraintLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="0.75"
-        android:orientation="vertical">
+        android:layout_weight="0.3"
+        android:orientation="horizontal">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="2"
-            android:orientation="horizontal">
+    </LinearLayout>
 
-            <ImageButton
-                android:id="@+id/btnLogout"
-                style="@android:style/Widget.DeviceDefault.ImageButton"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:backgroundTint="@android:color/transparent"
-                android:scaleType="fitCenter"
-                app:srcCompat="@mipmap/logout" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.15"
+        android:background="@android:color/white"
+        android:orientation="horizontal"
+        tools:layout_editor_absoluteY="360dp">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="4dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
-                android:text="Χρήστης:"
-                android:textColor="@android:color/black" />
-
-            <TextView
-                android:id="@+id/txtNameView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="2dp"
-                android:layout_marginTop="8dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <TextView
-                android:id="@+id/txtSurnameView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="2dp"
-                android:layout_marginTop="8dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/txtNameView" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
+        <ImageButton
+            android:id="@+id/btnVehicleCat"
+            style="@style/Widget.AppCompat.ImageButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:orientation="horizontal">
+            android:backgroundTint="@android:color/transparent"
+            android:padding="16dp"
+            android:scaleType="fitCenter"
+            android:tint="@color/colorPrimary"
+            app:srcCompat="@mipmap/sportscar1" />
 
-            <ImageButton
-                android:id="@+id/btnFineLog"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="@color/cardview_light_background"
-                android:backgroundTint="@android:color/transparent"
-                android:cropToPadding="false"
-                android:padding="16dp"
-                android:scaleType="fitCenter"
-                android:scaleX="1.5"
-                android:scaleY="1.5"
-                app:srcCompat="@mipmap/server" />
+        <ImageButton
+            android:id="@+id/btnCleanlinessCat"
+            style="@style/Widget.AppCompat.ImageButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:adjustViewBounds="false"
+            android:backgroundTint="@android:color/transparent"
+            android:padding="16dp"
+            android:scaleType="fitCenter"
+            android:tint="@color/colorPrimary"
+            app:srcCompat="@mipmap/trashcan1" />
 
-            <ImageButton
-                android:id="@+id/btnAnalytics"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="@color/cardview_light_background"
-                android:backgroundTint="@android:color/transparent"
-                android:padding="16dp"
-                android:scaleType="fitCenter"
-                android:scaleX="1.5"
-                android:scaleY="1.5"
-                app:srcCompat="@mipmap/analytics" />
+        <ImageButton
+            android:id="@+id/btnSmokingCat"
+            style="@style/Widget.AppCompat.ImageButton"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:adjustViewBounds="false"
+            android:backgroundTint="@android:color/transparent"
+            android:padding="16dp"
+            android:scaleType="fitCenter"
+            android:tint="@color/colorPrimary"
+            app:srcCompat="@mipmap/nosmokingsign1" />
 
-            <ImageButton
-                android:id="@+id/btnNewFine"
-                style="@android:style/Widget.Material.Light.ImageButton"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="2"
-                android:background="@color/cardview_light_background"
-                android:backgroundTint="@android:color/transparent"
-                android:padding="16dp"
-                android:scaleType="fitCenter"
-                android:scaleX="1"
-                app:srcCompat="@mipmap/g20" />
+        <ImageButton
+            android:id="@+id/btnTableChairsCat"
+            style="@style/Widget.AppCompat.ImageButton"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:adjustViewBounds="false"
+            android:backgroundTint="@android:color/transparent"
+            android:backgroundTintMode="src_over"
+            android:padding="16dp"
+            android:scaleType="fitCenter"
+            android:tint="@color/colorPrimary"
+            app:srcCompat="@mipmap/tablechairs" />
 
-            <ImageButton
-                android:id="@+id/btnViewUsers"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="@color/cardview_light_background"
-                android:backgroundTint="@android:color/transparent"
-                android:padding="16dp"
-                android:scaleType="fitCenter"
-                app:srcCompat="@mipmap/team" />
+    </LinearLayout>
 
-            <ImageButton
-                android:id="@+id/btnSettings"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="@color/cardview_light_background"
-                android:backgroundTint="@android:color/transparent"
-                android:padding="16dp"
-                android:scaleType="fitCenter"
-                app:srcCompat="@mipmap/settings" />
-        </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.25"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/btnFineLog"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@color/colorAccent"
+            android:cropToPadding="false"
+            android:padding="16dp"
+            android:scaleType="fitCenter"
+            android:tint="@color/colorPrimary"
+            app:srcCompat="@mipmap/server" />
+
+        <ImageButton
+            android:id="@+id/btnNewFine"
+            style="@android:style/Widget.Material.Light.ImageButton"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@color/colorAccent"
+            android:padding="16dp"
+            android:scaleType="fitCenter"
+            android:scaleX="1"
+            app:srcCompat="@mipmap/g20" />
+
+        <ImageButton
+            android:id="@+id/btnAnalytics"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@color/colorAccent"
+            android:padding="16dp"
+            android:scaleType="fitCenter"
+            android:tint="@color/colorPrimary"
+            app:srcCompat="@mipmap/analytics" />
 
     </LinearLayout>
 

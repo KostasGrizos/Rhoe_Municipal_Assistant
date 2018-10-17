@@ -197,7 +197,7 @@ public class RegisterActivity extends AppCompatActivity {
                 (newEntry5.length() != 0) &&
                 (newEntry6.length() != 0)) {
 
-            UserInfoFirebase userInformationFirebase = new UserInfoFirebase(newEntry1, newEntry2, newEntry3, "-", newEntry5, newEntry6, "", "");
+            UserInfoFirebase userInformationFirebase = new UserInfoFirebase(newEntry1, newEntry2, newEntry3, "-", newEntry5, newEntry6, "", "", "Vehicle");
 
             FirebaseUser user =firebaseAuth.getCurrentUser();
 

@@ -6,13 +6,13 @@ package com.example.android.rhoe_app_1.FirebaseUsers;
 
 public class UserInfoFirebase {
 
-    public String Type, Fname, Lname, SignatureNum, Municipality, MID, MACAddress, PrinterFriendlyName;
+    public String Type, Fname, Lname, SignatureNum, Municipality, MID, MACAddress, PrinterFriendlyName, CatPreference;
 
     public UserInfoFirebase(){
 
     }
 
-    public UserInfoFirebase(String type, String fname, String lname, String signatureNum, String municipality, String MID, String MACAddress, String printerFriendlyName) {
+    public UserInfoFirebase(String type, String fname, String lname, String signatureNum, String municipality, String MID, String MACAddress, String printerFriendlyName, String catPreference) {
         this.Type = type;
         this.Fname = fname;
         this.Lname = lname;
@@ -21,5 +21,6 @@ public class UserInfoFirebase {
         this.MID = MID;
         this.MACAddress = MACAddress;
         this.PrinterFriendlyName = printerFriendlyName;
+        this.CatPreference = catPreference;
     }
 }

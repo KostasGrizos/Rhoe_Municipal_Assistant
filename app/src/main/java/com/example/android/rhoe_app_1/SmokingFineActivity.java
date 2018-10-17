@@ -29,19 +29,14 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.Spinner;
-import android.widget.Switch;
 import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.android.app_v12.R;
-import com.example.android.rhoe_app_1.FirebaseFine.CleanlinessFineBInfoFirebase;
-import com.example.android.rhoe_app_1.FirebaseFine.CleanlinessFineBasicInfoFirebase;
-import com.example.android.rhoe_app_1.FirebaseFine.CleanlinessFineCInfoFirebase;
+import com.example.android.rhoe_app_1.FirebaseFine.SmokingFineBasicInfoFirebase;
 import com.example.android.rhoe_app_1.FirebaseMunicipality.RetrieveMunicipalityInfoFirebase;
 import com.example.android.rhoe_app_1.FirebaseUsers.RetrieveUserInfoFirebase;
 import com.example.android.rhoe_app_1.Zebra.DemoSleeper;
@@ -67,8 +62,9 @@ import org.json.JSONObject;
 
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.Objects;
 
-public class CleanlinessFineActivity extends AppCompatActivity implements LocationListener {
+public class SmokingFineActivity extends AppCompatActivity implements LocationListener {
 
     //Database
     DatabaseReference fb_DataRef_Fine, fb_DataRef_User, fb_DataRef_Municipality, fb_DataRef_FineTemp;
@@ -105,18 +101,13 @@ public class CleanlinessFineActivity extends AppCompatActivity implements Locati
     ImageButton FineInfoButton, FineClearButton, TimeStampButton;
     Button FineSaveButton, FineConfirmButton;
 
-    //Extra Information
-    private Switch switchA, switchB, switchC;
-    private TableLayout tableA, tableB, tableC;
-    private EditText A1, A2, A3, A4, B1, B2, B3, B4, B5, B6, B7, C1, C4;
+    private EditText A1, A2, A3, A4, A5;
+    private TextView A1tv, A2tv, A3tv, A4tv, A5tv;
     private AutoCompleteTextView C3;
-    private String[] C3Table;
-    private Spinner C2;
-    boolean conB, conC;
+    private String Category;
 
     //Tables
     private String[] FineBasic = new String[10];
-    private String[] A = new String[4], B = new String[7], C = new String[4];
 
     @Override
     protected void onResume() {
@@ -142,11 +133,10 @@ public class CleanlinessFineActivity extends AppCompatActivity implements Locati
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_cleanliness_fine);
+        setContentView(R.layout.activity_smoking_fine);
 
-        A = new String[]{"", "", "", ""};
-        B = new String[]{"", "", "", "", "", "", ""};
-        C = new String[]{"", "", "", ""};
+        Bundle bCategory = this.getIntent().getExtras();
+        Category = bCategory.getString("ConCategory");
 
         //Initial Printer Connection
         new Thread(new Runnable() {
@@ -192,6 +182,7 @@ public class CleanlinessFineActivity extends AppCompatActivity implements Locati
 
             }
         });
+
 
         //Basic Information
         //A-Printer
@@ -244,7 +235,7 @@ public class CleanlinessFineActivity extends AppCompatActivity implements Locati
             @Override
             public void onClick(View v) {
                 if (FineTypeAutoCompl.length()>0) {
-                    showFineDetails(CleanlinessFineActivity.this);
+                    showFineDetails(SmokingFineActivity.this);
                 }
             }
         });
@@ -257,12 +248,6 @@ public class CleanlinessFineActivity extends AppCompatActivity implements Locati
 
             }
         });
-
-        //C-Car Selection
-        C3 = (AutoCompleteTextView) findViewById(R.id.acC3);
-        C3Table = getResources().getStringArray(R.array.autoComplBrands);
-        ArrayAdapter<String> adapterBrand = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, C3Table);
-        C3.setAdapter(adapterBrand);
 
         //D-Location/Date Selection
         TimeStampButton = (ImageButton) findViewById(R.id.btnTimestamp);
@@ -291,47 +276,32 @@ public class CleanlinessFineActivity extends AppCompatActivity implements Locati
             }
         });
 
-        //Extra Information
-        tableB = (TableLayout) this.findViewById(R.id.tlB);
-        switchB = (Switch) this.findViewById(R.id.swB);
-        tableC = (TableLayout) this.findViewById(R.id.tlC);
-        switchC = (Switch) this.findViewById(R.id.swC);
-
-        switchB.setChecked(false);
-        tableB.setVisibility(TableLayout.GONE);
-        switchB.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                checkSection(switchB.isChecked(),tableB);
-            }
-        });
-
-        switchC.setChecked(false);
-        tableC.setVisibility(TableLayout.GONE);
-        switchC.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                checkSection(switchC.isChecked(),tableC);
-            }
-        });
-
         A1 = (EditText) findViewById(R.id.etA1);
         A2 = (EditText) findViewById(R.id.etA2);
         A3 = (EditText) findViewById(R.id.etA3);
         A4 = (EditText) findViewById(R.id.etA4);
+        A5 = (EditText) findViewById(R.id.etA5);
 
-        B1 = (EditText) findViewById(R.id.etB1);
-        B2 = (EditText) findViewById(R.id.etB2);
-        B3 = (EditText) findViewById(R.id.etB3);
-        B4 = (EditText) findViewById(R.id.etB4);
-        B5 = (EditText) findViewById(R.id.etB5);
-        B6 = (EditText) findViewById(R.id.etB6);
-        B7 = (EditText) findViewById(R.id.etB7);
+        A1tv = (TextView) findViewById(R.id.tvA1);
+        A2tv = (TextView) findViewById(R.id.tvA2);
+        A3tv = (TextView) findViewById(R.id.tvA3);
+        A4tv = (TextView) findViewById(R.id.tvA4);
+        A5tv = (TextView) findViewById(R.id.tvA5);
 
-        C1 = (EditText) findViewById(R.id.etC1);
-        C2 = (Spinner) findViewById(R.id.spC2);
-        C3 = (AutoCompleteTextView) findViewById(R.id.acC3);
-        C4 = (EditText) findViewById(R.id.etC4);
+        if (Objects.equals(Category, "Person")) {
+            A1tv.setText("ΟΝΟΜΑΤΕΠΩΝΥΜΟ");
+            A2tv.setText("Δ/ΝΣΗ ΚΑΤΟΙΚΙΑΣ");
+            A3tv.setText("Α.Φ.Μ.");
+            A5tv.setText("Α.Δ.Τ.");
+        }   else if (Objects.equals(Category, "Company")){
+            A1tv.setText("ΕΠΩΝΥΜΙΑ ΕΠΙΧΕΙΡΗΣΗΣ");
+            A2tv.setText("Δ/ΝΣΗ ΚΑΤΑΣΤΗΜΑΤΟΣ");
+            A3tv.setText("Α.Φ.Μ. ΕΠΙΧΕΙΡΙΣΗΣ");
+            A5tv.setText("Α.Δ.Τ.");
+            A5.setText("-");
+            FineBasic[5]="-";
+            A5.setActivated(false);
+        }
 
         //Final Buttons
         FineSaveButton =(Button)findViewById(R.id.btnFineSave);
@@ -370,7 +340,7 @@ public class CleanlinessFineActivity extends AppCompatActivity implements Locati
 
             fb_User_MunicipalityIndex = RUInfo.getMunicipality();
             fb_User_MID = RUInfo.getMID();
-            fb_DataRef_Fine = FirebaseDatabase.getInstance().getReference("Fines").child(fb_User_MID).child("CleanlinessFines");
+            fb_DataRef_Fine = FirebaseDatabase.getInstance().getReference("Fines").child(fb_User_MID).child("SmokingFines");
             fb_User_P1 = RUInfo.getMACAddress();
             fb_User_P2 = RUInfo.getPrinterFriendlyName();
             fb_User_OfficerName = RUInfo.getLname() + " " + RUInfo.getFname();
@@ -419,7 +389,7 @@ public class CleanlinessFineActivity extends AppCompatActivity implements Locati
         }
     }
 
-    public void showFineDetails(CleanlinessFineActivity view) {
+    public void showFineDetails(SmokingFineActivity view) {
         AlertDialog.Builder myAlert = new AlertDialog.Builder(this);
         myAlert.setMessage(Html.fromHtml("<b>Περιγραφή Παράβασης</b> <br>" + FineTypeAutoCompl.getText().toString() + "<br>" +
                 "<b>Χρηματικό πρόστιμο (€)</b> <br>" + FineAmount[Arrays.asList(FineType).indexOf(FineTypeAutoCompl.getText().toString())]));
@@ -484,30 +454,19 @@ public class CleanlinessFineActivity extends AppCompatActivity implements Locati
 
     public void saveAndPrint(String Print, String allComplete) {
         FineBasic = new String[]{
-                AddressEditText.getText().toString(),
+                Category,
+                A1.getText().toString(),
+                A2.getText().toString(),
+                A3.getText().toString(),
+                A4.getText().toString(),
+                A5.getText().toString(),
                 DateEditText.getText().toString(),
                 DayEditText.getText().toString(),
                 TimeEditText.getText().toString(),
                 FineTypeAutoCompl.getText().toString(),
-                FineAmountEditText.getText().toString(),
+                FineAmountEditText.getText().toString()
+
         };
-        A = new String[]{A1.getText().toString(),
-                A2.getText().toString(),
-                A3.getText().toString(),
-                A4.getText().toString()};
-        B = new String[]{B1.getText().toString(),
-                B2.getText().toString(),
-                B3.getText().toString(),
-                B4.getText().toString(),
-                B5.getText().toString(),
-                B6.getText().toString(),
-                B7.getText().toString()};
-        conB = extraInfoChecker(6, B);
-        C = new String[]{C1.getText().toString(),
-                C2.getSelectedItem().toString(),
-                C3.getText().toString(),
-                C4.getText().toString()};
-        conC = extraInfoChecker(8, C);
 
         if (allComplete.equals("1")) {
             if ((FineBasic[0].length() != 0) &&
@@ -516,6 +475,11 @@ public class CleanlinessFineActivity extends AppCompatActivity implements Locati
                     (FineBasic[3].length() != 0) &&
                     (FineBasic[4].length() != 0) &&
                     (FineBasic[5].length() != 0) &&
+                    (FineBasic[6].length() != 0) &&
+                    (FineBasic[7].length() != 0) &&
+                    (FineBasic[8].length() != 0) &&
+                    (FineBasic[9].length() != 0) &&
+                    (FineBasic[10].length() != 0) &&
                     (latF != 0) &&
                     (lonF != 0) &&
                     DateFirebase != null)
@@ -523,32 +487,23 @@ public class CleanlinessFineActivity extends AppCompatActivity implements Locati
 
                 FirebaseUser userFirebase =fb_Auth.getCurrentUser();
 
-                CleanlinessFineBasicInfoFirebase cleanlinessFineBasicInfoFirebase = new CleanlinessFineBasicInfoFirebase(
-                        A[0],
-                        A[1],
-                        A[2],
-                        A[3],
-                        FineBasic[0],
+                SmokingFineBasicInfoFirebase smokingFineBasicInfoFirebase = new SmokingFineBasicInfoFirebase(FineBasic[0],
                         FineBasic[1],
                         FineBasic[2],
                         FineBasic[3],
                         FineBasic[4],
                         FineBasic[5],
+                        FineBasic[6],
+                        FineBasic[7],
+                        FineBasic[8],
+                        FineBasic[9],
+                        FineBasic[10],
                         userFirebase.getUid(),
                         "No",
                         latF,
                         lonF);
 
-                fb_DataRef_Fine.child(DateFirebase).setValue(cleanlinessFineBasicInfoFirebase);
-
-                if (!conB) {
-                    CleanlinessFineBInfoFirebase cleanlinessFineBInfoFirebase = new CleanlinessFineBInfoFirebase(B[0], B[1], B[2], B[3], B[4], B[5], B[6]);
-                    fb_DataRef_Fine.child(DateFirebase).child("Fine B").setValue(cleanlinessFineBInfoFirebase);
-                }
-                if (!conC) {
-                    CleanlinessFineCInfoFirebase cleanlinessFineCInfoFirebase = new CleanlinessFineCInfoFirebase(C[0], C[1], C[2], C[3]);
-                    fb_DataRef_Fine.child(DateFirebase).child("Fine C").setValue(cleanlinessFineCInfoFirebase);
-                }
+                fb_DataRef_Fine.child(DateFirebase).setValue(smokingFineBasicInfoFirebase);
 
                 //Printer
                 if (Print.equals("1")){
@@ -563,7 +518,7 @@ public class CleanlinessFineActivity extends AppCompatActivity implements Locati
 
                 }
 
-                Intent intent = new Intent(CleanlinessFineActivity.this, DashboardActivity.class);
+                Intent intent = new Intent(SmokingFineActivity.this, DashboardActivity.class);
                 startActivity(intent);
 
             } else {
@@ -601,7 +556,7 @@ public class CleanlinessFineActivity extends AppCompatActivity implements Locati
     public void onProviderDisabled(String s) {}
 
     private class GetAddress extends AsyncTask<String,Void,String> {
-        ProgressDialog dialog = new ProgressDialog(CleanlinessFineActivity.this);
+        ProgressDialog dialog = new ProgressDialog(SmokingFineActivity.this);
 
         @Override
         protected void onPreExecute() {
@@ -757,96 +712,86 @@ public class CleanlinessFineActivity extends AppCompatActivity implements Locati
     private String MunFine() {
         String tmpFine1 =
                 "^XA" +
-                        "^MMT^PW561^LL0480^LS0" +
-                        "^FO64,32^GFA,03584,03584,00056,:Z64:eJztkz9u2zAYxT+VA7fwAgJ5hKJbiqjklZgpCqBEdDV49HUyBQw86BIdGGjIyiJDCMQQ+2jL7hUy6A0GBfjxx/f9IVq1atWqVatWfWH1c+IuChY0iWASpSh+z8zrpIkCzZTYmKdZMv/dab6jHNLiO7TFV/maVFSRLM4ZX21NVayys9WY97OqfO9rLuhvsCdfnq8FfJsgKScFXroSeQjXXeExXM+24KnB5wSee40Lj7qOU+QVfLHjnqyVgr+EVoMXcLDMc28Ve4mt4fhbXHiUTKZjvipo5ij1s2YTLi88sYlp8sIlM+xDZ7Zb8BdeFVXxIRGQ8Nn+IKvXHFXJJyjeTl6RVS9736gtz75beCyoGb4BpuJTyRxAzkk8Fx6lz8lpSmrae222Q0ahTz7upSy8ICsvue9j09QPMUZ+KE8he/vuO/Cm0de/Rrb3KPlRwl1p+DLCFR6CXevPkAKbiaUr8D49iizfR/DehsmJM8+JuviQzyvmokXn7uN9YH/gA+/uh2/J1rfg1W/V6MQln3g68o75NiHJhHw/A38mfkC+fOMa8G5Ql+Zj8+bkuZ6Bt0u+IEu/hMXpweMVvEE9H5WXZKUpvjv6oObSP57+9w88EZHUBIV51ejfbEr/tEH/mt5l6i7zwuOpf5gXtomWR8G9QhpSCvxOlXmpFealVtRTu/DMjPh5t8GIlPlE44LIzrhGkxRDDgf8YB8E5rMxDvtx2QeGidlVU44G+9BHHngmRdiHBpuB55R9gK8PjaLH6rwP/Yw0eVdGsuyfSTx8m6lEIi3K/WI88bB/wj2y8/6tWvVl9Q8Ka4fu:F327" +
-                        "^FO96,32^GFA,01536,01536,00048,:Z64:eJztkzGO2zAQRYdgMZ1ZbhNQ13AhiMfJEdZAhJiGCpU+Qq6RkoILXWMEF+4SLhLAKgRNhqRgbxtgy2Vn4evh+fML4PN87FFBtSoiLjocF/UX1BRbqPEHxJegGZcaewZcDsgYUl4HvQJhn/IrrqCI9pI/Azky3Oe8T/mz9oWPPJDwUfgVgxoo8c8qpp8PfoumL3wyXSD0JK/vrfF6yvze01w38rhGjx5ob7DzxafS059RRR3U3GBQQ/bvT1NsLKqY8qCiYxw3f6voOgo/ANXyUvHvTgPZd3y36uvmb9XbPfORWvnTxb8fJP+OX63qvvk3QNdb8ke/18TFv7t0tDP84FsLnPkYG+HfE7+CVl/4Tfwdd7cLVS+c+NKP8L/AMWx5oF9fk78R/mVI/o79Tfg686V/oF0N3zLfzFZN66tcccDQ6nFI/o5PN0WVwQff1FD8dwfpZ3XJX0s/Y1f8/W9FdvfsB3+q0k/VSv+Ly/3HBsdT6f8k6k317Adnfcv8upH7nV3u/2BNN5T+/QpzbZ58PetL5rdW9rNUuBzXPBgeeEn573BcjOzHcd4Pxu1+D5VmmE0veSf71DzxXPIupn2mvOxTR1P2eajS/hOf0/7VcSr8Fsr+N76WSPjob+/z/O/5B+m1StY=:4C1A" +
-                        "^FO96,288^GFA,02304,02304,00036,:Z64:eJztkrGq2zAUhiU0aJPWDOdKryGokV9JIcM11ASZ7s0L3AfJdJHwkJdI4QQPGSvoIoixe0zXbh26+Bdo+X9+vqMjxnbt+rs6aVMAEU0PPAEf83MtIj/zbQ7QmE6SX5xusfMiKt/o6sUUJ8rEaXrWzjvlNPkV9NYjGQDYGXge8lr4kPOt9nAA0OTXdtHR6TUq1XhvxBinhCIi3WdwytNhzi6SBb0yI6E3cBzzI6PIeNwyjQE6ZC+adXoRi/zslH9NVLH1fEU8E89WRDaxBKnkLOag4ZjX9Eh8TW3CdwJUoMAW3RCP/E5Nc6fNa1xximJFyrw+2kU1qrFVuq3nwxh+D/rtB2VOW+Yt4Yky5Dpb5JV4xKdXgnjaC/FQJuIXxNPslLzKKz1zoB5+B5DgjL3kIb0zPiSa63g/ALmBBVGJR1SjNL2PvYwR263nV8KOekQVlTlR7G0dil0MjWHlmLFlIj8etK++MaKQXwS2P9dvVS/e69pK4vHsz77CmXqQ/MqRemLhs6O9G0E8hnjG4VZDfwCO5Jf//Td37dq161/1G8uG5IA=:4938" +
-                        "^FO64,64^GFA,03584,03584,00056,:Z64:eJztUzFu3EAM5JoFO28eIGifkPYCCNKXUiqA4ltHhTvfD+4d7rLKFfcJF0z8AG+6LYRluJIcJC8IAmiuOQqkRjNDAuzYsWPHjh3/MVBSbLvc4g95CS00iU7IKC/cHrN0rznRFxnFHxnWNsaRk84ZibFyUplJplBB09PJBCM/uTnOR3ede3qQi0wSQdtyZQJO4eMyl1JdXvSgHAc4HOzpXvm+cyNZvr7OWivfKAxrm8cxFD4wMdZQ1/QwTdzDMJA1DEbnYMB3wFpToGtQvhqgJk+XhQ+QYwt3nZzGF0lw6MQiA5W5ZFvgTm4x4CUUfQCdeLws+oBCrCA5IVNENE6sCWDvuTHROYhOnM4tfBWAE1B9fZmzPtUYrfKxJJtctiODM9wgt9ZzqYumok+bxcumT99ZY7CWJMTo5rou+hqdo9AQsCqXQIufZc4a2fS1INkG+4jCiY/zbVv0ZdSH/o4837aoOXxTPyV32T6SbPoqkFkdOxsJn7hvbFX0DUYf+p58tJXR9MIxapub6Uzjmh84L1m34Kw+feB0sE/qCbQ6h3xAz/YJx1HuufC5jGc7bvrUz9pEelafPoc4UE+qTzWqxIECa61fM2350TP9lV/CWfk6jgdKRZ+dSn7FT61HzY/X/DDbt/x0XyqozKx8LvQNxaIPy9xQqdcUSecmXvMz85u+bT8xqZ+dl4TJyrqfXdYdyKVWfdt+rtXbPdQum6h+OjjOZQV4uwfSH0aS63oPS5vmoP9/3x8kELb+vbq48C33p29Xq2/+uD9INxvfjh07/hl+Af3VtWs=:2065" +
-                        "^FO352,160^GFA,05376,05376,00028,:Z64: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:21CA" +
-                        "^FT470,136^A0I,20,19^FH^FD" + GreekConverter("ΑΦΜ: - ΔΟΥ: - ") + "^FS" +
-                        "^FT382,162^A0I,20,19^FH^FD" + GreekConverter("email: " + fb_Mun_Email) + "^FS" +
-                        "^BY2,3,80^FT515,360^BCI,,Y,N" +
+                        "^MMT^PW561^LL0440^LS0" +
+                        "^FO96,32^GFA,03072,03072,00048,:Z64:eJztkzFu3DAQRUdgwXIuIHCu4WJBHSetShVKTGALdd7aQLA5R5pEW/kSLgSkSMpxN8EKpIeUtJsDpEmg3wggPh4+P78Adv1jwmB+2eAbQZMEJ8AhMLD3ZvIBYyPsmwhNdNAtfgs421ATY5WYBKzN/rquxjTSTMw1zUCzg3bjN9EER6J+UVThi/PmmKbHSCJu5cvGP5Dy7YhQce9WvnP2eOFej9lBDVD/we9wePImIJhJ6JbfDqOIHrMHD+Ddwy1/Z4dTnf0Kwy0/6bdr9ZjrhV/f+GKPp3P2Y2AMacmPeApd5otb+F42f2tfvpT8VLG1acmPaKF/nO/5P618GsUO379lvocJT4WfIj7pxXJz7Kn0E7vN39rh+TX7a+VjyZ9m+1kvRnPOv/T/YeU3k+b/GrOfNP8ZF745K/9Q8iufovu55v84aT9vc86f+3Fr//ZV+znc+6cXXvwda/8ct/792r+JdpSHe//4Y+W3rO/Lffbn96W1/0rMhQ/3/umy8llHY6ZI1/Q77wfTkHL/6k9To/tJseyHjgtfmbrPsac39TOx9p9y/kovXfaZYulH36b4dea6/8k313TN+zeFr6EFlv1v/CB/42/btWvXrl27/kO9A2TRKnc=:B6BA" +
+                        "^FO64,32^GFA,03584,03584,00056,:Z64:eJztUzFu3EAM5JoFO28eIGifkPYCCNKXUiqA4ltHhTvfD+4d7rLKFfcJF0z8AG+6LYRluJIcJA9IE2iuOQqkRjNDAuzYsWPHjh07/jlQUmy73OIPeQktNIlOyCgv3B6zdK850RcZxR8Z1jbGkZPOGYmxclKZSaZQQdPTyQQjP7k5zkd3nXt6kItMEkHbcmUCTuHjMpdSXV70oBwHOBzs6V75vnMjWb6+zlor3ygMa5vHMRQ+MDHWUNf0ME3cwzCQNQxG52DAd8BaU6BrUL4aoCZPl4UPkGMLd52cxhdJcOjEIgOVuWRb4E5uMeAlFH0AnXi8LPqAQqwgOSFTRDROrAlg77kx0TmITpzOLXwVgBNQfX2Zsz7VGK3ysSSbXLYjgzPcILfWc6mLpqJPm8XLpk/fWWOwliTE6Oa6LvoanaPQELAql0CLn2XOGtn0tSDZBvuIwomP821b9GXUh/6OPN+2qDl8Uz8ld9k+kmz6KpBZHTsbCZ+4b2xV9A1GH/qefLSV0fTCMWqbm+lM45ofOC9Zt+CsPn3gdLBP6gm0Ood8QM/2CcdR7rnwuYxnO2761M/aRHpWnz6HOFBPqk81qsSBAmutXzNt+dEz/ZVfwln5Oo4HSkWfnUp+xU+tR82P1/ww27f8dF8qqMysfC70DcWiD8vcUKnXFEnnJl7zM/Obvm0/MamfnZeEycq6n13WHcilVn3bfq7V2z3ULpuofjo4zmUFeLsH0h9Gkut6D0ub5qD/f98fJBC2/r26uPAt96dvV6tv/rg/SDcb344d/yF+AelMtWs=:2DA4" +
+                        "^FO384,96^GFA,03840,03840,00020,:Z64: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:041F" +
+                        "^FT382,143^A0I,20,19^FH^FD" + GreekConverter("Απ. Σαμανίδη 21 ΤΚ 552 35 ΠΑΝΟΡΑΜΑ") + "^FS" +
+                        "^BY2,3,80^FT515,320^BCI,,Y,N" +
                         "^FD>:]>5100760>68[>5150417>64[16]^FS" +
-                        "^FT382,183^A0I,20,19^FH^FD" + GreekConverter("ΤΗΛ: " + fb_Mun_Tel1 + " - " + fb_Mun_Tel2) + "^FS" +
-                        "^FT382,253^A0I,23,24^FH^FD" + GreekConverter(fb_Mun_Name) + "^FS" +
-                        "^FT339,13^A0I,23,24^FH^FDNo 000000^FS" +
-                        "^FT382,227^A0I,23,24^FH^FD" + GreekConverter(fb_Mun_Department) + "^FS" +
-                        "^FT382,205^A0I,20,19^FH^FD" + GreekConverter("Απ. Σαμανίδη 21 ΤΚ 552 35 ΠΑΝΟΡΑΜΑ") + "^FS" +
-                        "^FT382,279^A0I,23,24^FH^FD" + GreekConverter(fb_Mun_Region) + "^FS" +
+                        "^FT382,122^A0I,20,19^FH^FD" + GreekConverter("ΤΗΛ: " + fb_Mun_Tel1 + " - " + fb_Mun_Tel2) + "^FS" +
+                        "^FT382,101^A0I,20,19^FH^FD" + GreekConverter("email: " + fb_Mun_Email) + "^FS" +
+                        "^FT382,213^A0I,23,24^FH^FD" + GreekConverter(fb_Mun_Region) + "^FS" +
+                        "^FT339,15^A0I,23,24^FH^FDNo 000000^FS" +
+                        "^FT382,187^A0I,23,24^FH^FD" + GreekConverter(fb_Mun_Name) + "^FS" +
+                        "^FT382,165^A0I,20,19^FH^FD" + GreekConverter(fb_Mun_Department) + "^FS" +
+                        "^FT382,239^A0I,23,24^FH^FD" + GreekConverter("ΕΛΛΗΝΙΚΗ ΔΗΜΟΚΡΑΤΙΑ") + "^FS" +
                         "^PQ1,0,1,Y^XZ";
 
         String tmpFine2 =
                 "^XA" +
-                        "^MMT^PW561^LL0208^LS0" +
-                        "^FO256,160^GFA,02560,02560,00040,:Z64:eJztkjFu3DAQRYeYgkUA8QK2eA0XgnglliwWEA0VKfcKucly4SK3CGhs4S4YV5lC0HhoyzJygTTRByFIwMfX458BOPRPNLjMei5MLrvR3AoDuQvLrY6huh+mBvnwWYh6JtKn69UX9duTvNIQaqDdN9qcXH4W5g66Dm81AXeBpfIpVGH1rVteTvbxmWLqwXtzLQlSj9lQShboZArcffEpDcsKnZMn5ZMVM9DA7pFGU2H54pNridMCzqovwrTYAuTJmtqrj3Y+bHlhxdXKXBlCy6u+urn2WJF2Pny6Cg2DFft9Vr5haHy+WFO8KVjefUEy4y0Ljw9e5vOsfOMDZml1zu2/Lm8+iOYlT9Sn3uFPVL4+YZnItjz12T0vwUsm7tLY4W/U/rqkeRufqVh3PvMHKPo4ePMLlc/Hxnf/cd9iaO8PRPMcD51ZUfkc/9Uf7/3BpHmWemeWxmep9XeK7/OoMGz9naWuIOzaJFcUzdP563xTm2+Qy+d8z1JO0O7nBZbm07fXz30J4re9cpo3QmCs3wS4+bCGff/2vEOHDh069F/oDbD/FhI=:C05B" +
-                        "^FO320,0^GFA,05120,05120,00032,:Z64:eJztV0FvG0UUfrMz2d3K2/UYqmpCTOyoiF43okIbQGRWRO2FAz9hjaVy9T/w2yZKI1SFHnMLUv9AEJccx00UbpB/wJpIHFEqLpYwu7xN4ri11yqHqpf6XTLOp2++972ZNzMLMI95zOPdjSg/Zo1/UXb3GNyHDQbr5w0w+kMILvF+vssbA1zLdzh+C79yWB+spxjneIVrtsVB6VUmOERwzAGCODbamCscuM0hSO+wXQvauE14nAbYwnSE20SMu0fs8ZByobnAoDQRxCPc9zmm+VnyOLvIBVmCIZ5hc4QrwRk2I2YJx/RoLs5A6giCER46OSVg8k1vPT2iXGwgfhtGfC2dnBjYTVypvyK+wy70R/xU+TR/iMnmXhD/4dP8WPCv9bUgjq4xxmRTP6QxM+aV/C/8VzDBw2b8MY0hfdX/Rf1ukqvTQN8TRf06sYl6o/ox8rw/qEKO5+tpWM2xqH+e5j/keIUf88bQhi7EjlFODo1zB7pmmUbzeKvRwhrU4G5Gu4FGD7JJvImr+Al+l4Fx6e8vU3hHr2INtQBN7QRGTAmkKxhg6oNRNDL+FN7tC6kLvuz2aV+W4LtBijbpd/to7Ck8iHZlhIV+EJXpB73vgxa1oVFBryT/WPZqsuUMSV/24MFwyn+Y/HxwBwr9cLNEv7OY/PT0fSj0F5My/Ury48FnBV9VkrL8F5j+5nbBlwuszL/P0o7vZN3fBj7Lp/MHm5mO5wwJtwmfyv9dD/MaXL8Gx9L/OiBlYyjoEN4fOsiwR71jHE+w00vcglA1Mr/A6eBjaHANjeXb1cElbhMfhKDFAxV0aN2pd7RtC88bKQQhuDbQyR3EIfGL3oGKra73D/GlAGVBrBXh3R45vSHkNR4qCHwILUiNW+DUO3Bjm36P+bTZYsGodxugmxFVQpxI/pI+NWtqc6TGQxMcEd89Caxr/18wrNIUlLsXoZG098HdGPHJ/18cl/C80HZp368lBf/PkT75v29BDaVL1lWvuIoK/Y/G+QfPbQjQcwv/xK1c8D8d+68lHlkXsqhfD81NVujfqtev4MY/yX6WtrOwUVw8+xn1DuHLo/pD42/4fajvZrSKjm7QVVTgQrB0YqGbM7bFPN5k2IpJBp2S+l+G5XLFeTbun4lwBFfMsaviev0nwrcU93jlkZq+fy4nyGTksYWX+mcSV2cu39kOrHKcC9VXzNsa988E/kQ922M7J2E5bjNRq0kmNmbwLb6z9DnpP5yh77C9xUXF3Huz8ofDDyoed7+c5R9Oby3Q8XN7fP5MRLrs8Mz1Z9SfrtG6w85db3T+zePthWKnitHxF/VfQNn9r6oDRR8DafvsRcn7B6DueZL4qV6hM7hs/yibmg8P4nbZ+4dC2ipi8FRHvbL3D11FljpLcK+P/bL3H/G5bDH4OoJW2fuHrgJLPeP4pI0rpfkryRdr3GxFsFLuP7SWlqz0UcEv069L+72aiJ/P1Fc2NU9zs0Xfb6X+6/X6gpKJ7s3wXx3Uq4cqSfOk7P1GH0Np3Qk8rZfn77f/F/8B6SuKPw==:8BDB" +
-                        "^FT329,31^A0I,23,24^FH^FD" + GreekConverter(FineBasic[0]) + "^FS" +
-                        "^FT400,57^A0I,23,24^FH^FD" + GreekConverter(A[3]) + "^FS" +
-                        "^FT329,83^A0I,23,24^FH^FD" + GreekConverter(A[2]) + "^FS" +
-                        "^FT425,109^A0I,23,24^FH^FD" + GreekConverter(A[1]) + "^FS" +
-                        "^FT425,135^A0I,23,24^FH^FD" + GreekConverter(A[0]) + "^FS" +
+                        "^MMT^PW561^LL0112^LS0" +
+                        "^FO256,64^GFA,02560,02560,00040,:Z64:eJztkjGOGzEMRSmoYGddQB5dw8VAupJKFQNYxhYpc4MgJ1lr+yAn2ILAXoDbqRiMQskZB7lAmsyHG2Eevj/5CXDoX8i1/ArmhSYPVL3X5Z6Bzb22D/KBzHdFoT041QAVTRZitBOWa4GIjtsnz4EC71xoL40MkBc/9s7IC+op1EZ1CdSqcNvjj/GNjGJrgdkap98Y0qSz4pQQeFEF7OC8ubHJbfUXrt58M7lC27SEnKt88YpgHdxigBGuq00cJ3zHnOSBBdhxjy0cD64KZ6BVXyWfXo1wofuRo74GTXpwih1EAynZRfKpipBgnns+V1AVp4oundPkxDJfqt+4bar2fP6ic5PQ3U+RycNPuIgwx/OPeF273wJT0uXK2P2Ew7Lnk5+n8JNkzpHvlMTvdz5FmgaXxhxncl8kH659Xhd7vvNj3qL4z/7AUfja9/fa85n61/7qsw8EVxxytDj6QO77W+Log2DumJF+P1o1FLTs7zT6lQdLv6n3G9p92+/lJpxsSvJZvLUCWNznfi+hubbfnxYue/28P03heX+736FDhw4d+j/0C3dUEYQ=:CE9A" +
+                        "^FO128,0^GFA,01024,01024,00016,:Z64:eJzdkD1ug0AQhWc8a0DyBq+7KSI5uQElJUdIbsARSOcisrFBhALBFXKUPUAukI4yZUoqCAq74D5Forzu0+j97AL8d6GAHN0XraLgm6mACppGcxybO0pMc+AkmgwrqvBcA4fpxDSIeyRQOxNIvby7UMobW7CSTzmeO9dyLd9rbDrfIObicdygzJ3SWpY1lLyZ8hHebtY5lrwzffCxbQoqObD8sHbJFSo2++DgU9ZvO7MfIBj3H7DTwc8+6reE2YCf+/75pGfO+n3fn1rDmhxHCQWxdTg+eT4vLD2UgiGyzEyVx9BaDhQKTy332KOCec5PE0ZH8dyfhh5dwtmP+lYiBVd+3yd6veon18Fo6adxP7ZHmw84QAJ6ft+f0hdwAkuM:F7AD" +
+                        "^FO384,0^GFA,01536,01536,00024,:Z64:eJztk7FKA0EQhmd2lrsrjnWFIFOIYmM9MSkOEU3A3lc40NIiDyDkwolaWafMI1imjGhhIZrS8ipLsbwiGBc1ObKVjYXoFAf78TH8NzsL8F8/U9qqVMgq0YvcJIEIuU/g+aytIGvfh8iwUGREeTycaKFwIqceXyoDoaVSzvxATJ2u5vqtxwOmq+kZN549PbBYvwns1pGXX4lq5Eq2Nj2fRNcJpVnz+tMgbuQ02FnzOKa2nmPaXPE4FCJTKBLj+6NUujhK/Pn89UJkFI5jDTbMJtjHL075BSUcGQPJXlHiBWUzX9Oq1WEAVjriDvNORhmOyO1NmgheVvumdcgxuj1rseD525wrQ8MIXgBG0SLX+Krh2Pla1lV1XxRDaWAX4PFOunk8yw8YwVMNmgAH99LuRTM7oz71t7/69/J+5VuyG3D7kecabTWKYcCH+Wf+Xjas+Djmdu5yuP+9zsYVL5izB/cO3XymWVHxVJZh3/lh62Qd0u9cwm+td3XJUw4=:6AC8" +
+                        "^FT143,39^A0I,23,24^FH^FD" + GreekConverter(FineBasic[1]) + "^FS" +
+                        "^FT143,15^A0I,23,24^FH^FD" + GreekConverter(FineBasic[3]) + "^FS" +
+                        "^FT409,15^A0I,23,24^FH^FD" + GreekConverter(FineBasic[2]) + "^FS" +
+                        "^FT409,39^A0I,23,24^FH^FD" + GreekConverter(FineBasic[0]) + "[" + GreekConverter(FineBasic[10]) + "]" + "^FS" +
                         "^PQ1,0,1,Y^XZ";
 
-        String tmpFine3 = "";
-        if (!conB) {
-            tmpFine3 =
-                    "^XA" +
-                            "^MMT^PW561^LL0208^LS0" +
-                            "^FO64,160^GFA,04096,04096,00064,:Z64:eJztlD1u3DAQhYeYYjrzAgvxGipo8UpOFQERIC5UbOc9gnMSm4aLLX2BIGHgwl1CI4UZWNjJ0NQ6KQMkpZ4ASSD0+HH+BLBq1T9I896/8BVfq6g9TuxljXPSNy+xdVF/VNHi9ynKg4+WfAvOY3RH98KvnwLxAd6x4UZFArzjIGvjfEHmKVkXXSr+wzbIY5wtwQBjVMHM5on5jf/Aji/xT34+czkLn7OKHe7uCn88doXP+ZWf+VgDoN02tmCMCsIPWPjQ9w36QXBpUGFD023hw+DI9yr1KsAGfWqq32gWf6c5CF8uWVKyOfqu1dvUqWh4eih8yG7vW4wDRujQ5676O+Ige8udgAIVPsZxptBYUrEpfvVU+Co5iR+DLXwKF5vqn7HwM7HXnoVPWbZxwjdZT7GRtDC8FL6EvRN+6Cq/t9Wf8C60KtHOk2KJn2bQYC16PZNkWgWtYSx8CucHP9CXjfg3b35M+FCiwr3Xe5b8C99J7OJ/5UtbXIKLimftzx/9Ea+uKRk5Xptf/SqpR29VxAMQLfU30PTlIMIvbdHAeRA/gX2Eo/DFP0saLur5MzxKVTN+A71f6q/9WS/8tvLpGj4UPkX7vGWJX+fC7yofBvUMLfTqM5Be6o/BXEj+av4DfoIl//b99l7Api/xb9JSP2Dhd+oo/KnWH5POv+uPs/pR62/H6X6KQ2NL/pvFTzCCBaNmiX+pPyRKFJb+i2pWX2v/WUeH29RvbKm/jkv/S055L3fNOz71v46n/nc8ZXyo/W/dbpIl20n/p8UvfTMomT+YiZFP80fBpDp/jlWm0/yZPYYxDEbmL9WTFn6HMv8+y9sbX3rtZ51/x9vSB3X+JUPRyZc3Mn86/OUfZtWqVatWrVq1atV/1C9Vgqkh:D430" +
-                            "^FO128,0^GFA,08960,08960,00056,:Z64:eJztmLGO20YQhv/RrEkWNG8DpNhCiGSnSSkgQSCkuVV0gNs8Av0GNuDiigO8Cg/KFYHcuswjuEy5pwvOTQo/Ag03KVNegMMxQwOW2h0FToyAfyUI/PRzuNS/swMM+o9kDFM8o6NOyVXVCKHjF1qu91utVoaVHDAChyiuWrGQ3mQH+I3QZnqOkcGz0XMhQ8s/KymDe70flUquQhlGqPlC7ec8i99LJQe4VtYPv6o5W9Mq4I2am87QBbRqzlucAbWaGzTo44sYi2DJkZLjBnVwfKHN3d5P9gd9XrOESxf0ec2F589ifqvmLtrMtfmdmht7Y/1Indf8bZ3Na9bmLtE3vR8VWrvmYS31sTZ3iReebSSr5MDvWlk/fV7zIvb5qc5rDi0c8Keag4cd8nrQp6bMsMtwgjB+/hcepefSKOOywjVC8fwmvk7ncsNmjGuSBs36qMizitcOWw6Yzl/FKp0zzBZLOQDMrPUKv4z5F1xJYbOpi4r+2hDFyaVsKHZ6X1OfnG3i8eVaOtC6UjzPLO8oPlmcC+fNo/T9aNTXV8cNULSFoj5ZP575+DtQRqdcv3kb/5APYaZ6nmxc7X+AnCBq3foV5XE8lTsOmvdT/JyZxJlENoXX6v190KB/QUSIT7u3B/TXIT7o3l1IjGr9/GMsDpiHICK0B8xDhIte31+/54K+v5YDNXzQ99e93+Og76/fc1DPQ2TdIr4M+v66r+9r6Pvr/j6/wwHzEOE+P6C/xuQOXxzQX2Nyi3Lorwd9klp08YnBUj2/fts1dxm2pJ1fe2q49zvX5jVveCN+G21eZ4bO7ZLU8+uqwnq+pbWWcwa/zZfUaPN6XmL91VXXKOfX3hqcnCw7bV63hdR3vaVGOb/2Rp7n+ZJW2pznijc/bilo85ryPKclqfNa3s+cxa9V2nXhNKcrCrXSb9CgfyJC6V3KhZLYp5OOPvwfOJRtEtcn9lH34mbnZ+qknsvTT3KyLvf5Uk7nKRw4483I7fOzPE7rnfrEzqyeqyRBq/l+fziz0yROEvt7Y3f7Ed+6OomTxG7K2Qc/ykvnU7A+sS+LnR9vyiKmcK0Tv5e7+sgYk+Ynib2y++eZlVVI4fr1C6/265eX99I4anK8GY93P3ObJ3Ek7yfao5vdF2dpLQJ18RlqapMuHvS/1N9ySOJw:8E1C" +
-                            "^FT457,109^A0I,23,24^FH^FD" + GreekConverter(B[2]) + "^FS" +
-                            "^FT457,7^A0I,23,24^FH^FD" + GreekConverter(B[6]) + "^FS" +
-                            "^FT457,32^A0I,23,24^FH^FD" + GreekConverter(B[5]) + "^FS" +
-                            "^FT422,58^A0I,23,24^FH^FD" + GreekConverter(B[4]) + "^FS" +
-                            "^FT457,84^A0I,23,24^FH^FD" + GreekConverter(B[3]) + "^FS" +
-                            "^FT152,135^A0I,23,24^FH^FD" + GreekConverter(B[1]) + "^FS" +
-                            "^FT457,135^A0I,23,24^FH^FD" + GreekConverter(B[0]) + "^FS" +
-                            "^PQ1,0,1,Y^XZ";
-        }
+        String tmpFine3 =
+                "^XA" +
+                        "^MMT^PW561^LL0264^LS0" +
+                        "^FO384,96^GFA,01920,01920,00020,:Z64:eJztkj9OwzAUxu0kJA/JSs2WIQL3Bq5YKgaaXIAzpBdAZWNAihuqqkOFGBmQegUOwNAAqhg4REYGhnbrEKnkj2Oatiuw9FNkWT99+t7ze0For1+RhoS8ccUMNJU3qhgo3w8jO3wNIURic3anPy0bScmsRXy77KStlbVIO/OqnIhIc8xegduMVTHxzOgOjuIHagY9yRwxNJtD1n/gpvI58cDoGq3MdxNw5RsUvhG93shrxda98VP3NQIG7Fa/t1V/83CypE5rZRylVObpoj1JwGHPhH6qPPVwinhvgwFHnNcIR6SHTuY1xlBWtKor1UPWFG1os+IfCItsydlO81MxhNyCuTUG1bfGnPy/yc9CF5qGo8N3G32dH74HrGDh0MK4kYZWGjZSr5xfEOl9nbS7Q9DHbVbOz58d9LHr+G8GfnS8knkvpB8BTMcEj0DmeTMSY+JOP8gJcWWeF4GvA4gRHAPIvfkz2sUkyyPZGZb78CPazPLyuiMIk7I/k16tMoe1DIkj8y41xk8BbJScqbyaPL7NZH/5PLZ82hpjO3yVzB1sr73+Sd/itm90:3CFB" +
+                        "^FO256,160^GFA,00256,00256,00004,:Z64:eJxjYBhg0ADELkwCDHnMDxhqGA8w2ADpOvYPzP/7fzEIMBxgkACqEKCd9QA12Qn8:DEAC" +
+                        "^FO32,160^GFA,00256,00256,00004,:Z64:eJxjYKAvqALi+gNA/ICBgfEDkFMBxDUMDPz/GBjk/0FoBhkIlv/PwGAP5NsDaQYLiFqQnnoQbgBroxgAANcAEJE=:A190" +
+                        "^FO512,160^GFA,00512,00512,00008,:Z64:eJxjYBgFaICRA0p/gAo8QOUz/4DQ7H+h8glQ2oHWLqMBAABr4QVr:9FD6" +
+                        "^FO0,0^GFA,09216,09216,00072,:Z64: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:EA58" +
+                        "^FO128,160^GFA,01920,01920,00020,:Z64:eJztkjFugzAUhm0h4QXZOcCrewVGR0LhLL0BTM0QtakYvJELVPQqRQwe0wNkqMTA2qEDQ+XUwSXBgR6gFf/ip0+///f0bIRmTWtBEAJzQnhhobdF3JxcXFhiWOcbsHbM4NEjwcEHfAjTUvkdo3EmmY410yKt99T6cCUBloqBSEtpGcf1Lod1XYBo651lCDckgFQBhElD/J8utaQ8qQsukubsO+Wl6hlEck+GecumiESrWW773lUyAEGo8T2Q83xHuoooa+OPFdPWd4NNTwD8CgkQPVpbNLFKGGywL+hgg33BBxvsC7Yd+/6DNmiN3wQ47Jhp1go+RFhlkkLkMK+SMueCOuxJEfPETp6X7TPzFdy7pSIAkeubyMPVqe/1fC+j+dDm9hO/u3lWbp5V/OVaOub+ocVvvuv4CTZr1h/TN6H3ZY4=:A393" +
+                        "^FO416,160^GFA,01536,01536,00016,:Z64:eJztkbFKxDAYx/MlH5cMHzRjhxt6+ALtVnBoBB/k+gY+gHDVgDqIs48T0NGHCJzg6uhwXE1z2ksHQXERud/Q8OfPr//QMvYPgd2Bn1nsDvqy78Ye2JmEChHcHJ6LJRN2m617UvK1sZuiYCAwby0i5ifXWJrgzuqFvVWk/B2FnvGZrgCRyJxi8BnnZWVJKeWeYi8w9orMY/Q5//Bd9CH4behRt1fzYf+SZ2tLfR/23xo/7EsAXPXhfq5x3/wg6oeZ2F9HsnNwzow589vMd37Mun2g0izHXB/Zm7rb5/ATcp349fHFfZ76FWht9n25mPr58P50/2W6L+UGXOJHEj+S+Hx49H6aV26aEwQ7cOD3vAPVAkg2:61BB" +
+                        "^FT359,127^A0I,28,28^FH^FD" + GreekConverter(FineBasic[4]) + "^FS" +
+                        "^FT425,186^A0I,31,31^FH^FD" + GreekConverter(FineBasic[5] + "€") + "^FS" +
+                        "^FO24,172^GB0,51,2^FS" +
+                        "^FO259,172^GB0,51,1^FS" +
+                        "^FO170,114^GB0,50,1^FS" +
+                        "^FO301,172^GB0,51,1^FS" +
+                        "^FO535,114^GB0,51,1^FS" +
+                        "^FO535,172^GB0,51,1^FS" +
+                        "^FO170,113^GB366,0,1^FS" +
+                        "^FO24,172^GB236,0,1^FS" +
+                        "^FO170,164^GB366,0,1^FS" +
+                        "^FO24,222^GB236,0,1^FS" +
+                        "^FO301,172^GB235,0,1^FS" +
+                        "^FO301,222^GB235,0,1^FS" +
+                        "^PQ1,0,1,Y^XZ";
 
-        String tmpFine4 = "";
-        if (!conC) {
-            tmpFine4 =
-                    "^XA" +
-                            "^MMT^PW561^LL0112^LS0" +
-                            "^FO256,64^GFA,02560,02560,00040,:Z64:eJztkjGOGzEMRSmoYGddQB5dw8VAupJKFQNYxhYpc4MgJ1lr+yAn2ILAXoDbqRiMQskZB7lAmsyHG2Eevj/5CXDoX8i1/ArmhSYPVL3X5Z6Bzb22D/KBzHdFoT041QAVTRZitBOWa4GIjtsnz4EC71xoL40MkBc/9s7IC+op1EZ1CdSqcNvjj/GNjGJrgdkap98Y0qSz4pQQeFEF7OC8ubHJbfUXrt58M7lC27SEnKt88YpgHdxigBGuq00cJ3zHnOSBBdhxjy0cD64KZ6BVXyWfXo1wofuRo74GTXpwih1EAynZRfKpipBgnns+V1AVp4oundPkxDJfqt+4bar2fP6ic5PQ3U+RycNPuIgwx/OPeF273wJT0uXK2P2Ew7Lnk5+n8JNkzpHvlMTvdz5FmgaXxhxncl8kH659Xhd7vvNj3qL4z/7AUfja9/fa85n61/7qsw8EVxxytDj6QO77W+Log2DumJF+P1o1FLTs7zT6lQdLv6n3G9p92+/lJpxsSvJZvLUCWNznfi+hubbfnxYue/28P03heX+736FDhw4d+j/0C3dUEYQ=:CE9A" +
-                            "^FO128,0^GFA,01024,01024,00016,:Z64:eJzdkD1ug0AQhWc8a0DyBq+7KSI5uQElJUdIbsARSOcisrFBhALBFXKUPUAukI4yZUoqCAq74D5Forzu0+j97AL8d6GAHN0XraLgm6mACppGcxybO0pMc+AkmgwrqvBcA4fpxDSIeyRQOxNIvby7UMobW7CSTzmeO9dyLd9rbDrfIObicdygzJ3SWpY1lLyZ8hHebtY5lrwzffCxbQoqObD8sHbJFSo2++DgU9ZvO7MfIBj3H7DTwc8+6reE2YCf+/75pGfO+n3fn1rDmhxHCQWxdTg+eT4vLD2UgiGyzEyVx9BaDhQKTy332KOCec5PE0ZH8dyfhh5dwtmP+lYiBVd+3yd6veon18Fo6adxP7ZHmw84QAJ6ft+f0hdwAkuM:F7AD" +
-                            "^FO384,0^GFA,01536,01536,00024,:Z64:eJztk7FKA0EQhmd2lrsrjnWFIFOIYmM9MSkOEU3A3lc40NIiDyDkwolaWafMI1imjGhhIZrS8ipLsbwiGBc1ObKVjYXoFAf78TH8NzsL8F8/U9qqVMgq0YvcJIEIuU/g+aytIGvfh8iwUGREeTycaKFwIqceXyoDoaVSzvxATJ2u5vqtxwOmq+kZN549PbBYvwns1pGXX4lq5Eq2Nj2fRNcJpVnz+tMgbuQ02FnzOKa2nmPaXPE4FCJTKBLj+6NUujhK/Pn89UJkFI5jDTbMJtjHL075BSUcGQPJXlHiBWUzX9Oq1WEAVjriDvNORhmOyO1NmgheVvumdcgxuj1rseD525wrQ8MIXgBG0SLX+Krh2Pla1lV1XxRDaWAX4PFOunk8yw8YwVMNmgAH99LuRTM7oz71t7/69/J+5VuyG3D7kecabTWKYcCH+Wf+Xjas+Djmdu5yuP+9zsYVL5izB/cO3XymWVHxVJZh3/lh62Qd0u9cwm+td3XJUw4=:6AC8" +
-                            "^FT143,39^A0I,23,24^FH^FD" + GreekConverter(C[0]) + "^FS" +
-                            "^FT143,15^A0I,23,24^FH^FD" + GreekConverter(C[1]) + "^FS" +
-                            "^FT409,15^A0I,23,24^FH^FD" + GreekConverter(C[2]) + "^FS" +
-                            "^FT409,39^A0I,23,24^FH^FD" + GreekConverter(C[3]) + "^FS" +
-                            "^PQ1,0,1,Y^XZ";
-        }
+        String tmpFine4 =
+                "^XA" +
+                        "^MMT^PW561^LL0230^LS0" +
+                        "^FO25,50^A0I,23,24^FH" +
+                        "^FB500,7,,J," +
+                        "^FD" + GreekConverter("1. O/H " + fb_User_OfficerName + " κατέβαλα τον/ην ανωτέρο οδηγό την " + FineBasic[4] + " ημέρα " + FineBasic[6] + " και ώρα " + FineBasic[7] + " στη(ν) " + FineBasic[8] + " να διαπράττει την/τις σημειούμενες με Χ παραβάση/σεις, για τις οποίες σας επιβάλλεται διοικητικό πρόστιμο" ) +
+                        "^FS" +
+                        "^XZ";
 
         String tmpFine5 =
                 "^XA" +
-                        "^MMT^PW560^LL0300^LS0" +
-                        "^FO25,0^A0I,23,24^FH" +
-                        "^FB500,13,,J," +
-                        "^FD" + GreekConverter("Στη(ν) " + FineBasic[0] + " σήμερα την " + FineBasic[1] + " ημέρα " + FineBasic[2] + " και ώρα " + FineBasic[3] + " ο/η υπογεγραμμένος/η " + fb_User_OfficerName + " Δημοτικός Αστυνομικός, κατέλαβα τον πιο πάνω παραβάτη να υποπίπτει στην παράβαση ή τις παραβάσεις που σημειώνονται πιο κάτω με το γράμμα Χ και για τις οποίες επιβάλλονται τα παραπλεύρως αυτών αναγραφόμενα πρόστιμα, κατ' εφαρμογή των διατάξεων του Δημοτικού και Κοινοτικού Κώδικα (Ν.3464/06) και του ισχύοντα Κανονισμού Καθαριότητας του Δήμου (αρ. αποφ.: 499/2011)" ) +
-                        "^FS" +
-                        "^XZ";
+                        "^MMT^PW561^LL0060^LS0" +
+                        "^FO224,0^GFA,02816,02816,00044,:Z64:eJztkrGK3DAQhkeoUHfzAsZ6DRc++5U2pFm4JdbiwqUf4e4xUo7ZYsu8wiwuUp6OKyK4ZScjr+9ImRSBBPY3CGN+ffr1ewBuuummf1Fefk/pD71/S/jYnxifygYDJEiGQZLMMspz2EqQmRqoEo49q9e5/cRtLEsHRvQh6M7dQY5yDBvZy4FqqLfO6Xf1DoeZJZUeg5VB+sztZn37HpKuM1dQbXG0C7efJoq7AgfdNgx73b/1YMkdaFPombSFuna4cMHObLgBHAMOY79nMPEObMBeYoP9ScuqWrnmBfNChktwR43u7MRgWb3kjXDhzCQRdv7izOKFN7bqtc+Zaw8MSJnbWGHlskRM7QXt1duRIa8lKHewEwFCzrszJyqcUIz+XBZrXmgXLkjAccnbwp2VkMwbZ3bSknw+YPHeK1e9P3Le3IPPXtrACxUg9Ik3NRZu5T6859XO5PECGDL3C7xq5pkfOFb49T3vtQebe9iLP4OjnNfD51Bo/HuKtavWvOZ16dd90x5C8pdrZwGDKLfnllKFac2r94W4U+jHOG1yv446yFxPm52L7uO/6QgA6pxdtc4Dt0H6vHbJJpSF6/TqbYTyg9ulZc6oBZ0z8qE924iycHMUfILmF+4yv3oHnV/2AZPllXvTTTf99/oJ5S91+w==:BA6E" +
+                        "^PQ1,0,1,Y^XZ";
+
 
         String tmpFine6 =
                 "^XA" +
                         "^MMT^PW561^LL0120^LS0" +
                         "^FO25,50^A0I,23,24^FH" +
                         "^FB500,3,,J," +
-                        "^FD" + GreekConverter("X " + FineBasic[4] + " - " + FineBasic[5] + "€") +
+                        "^FD" + GreekConverter("X " + FineBasic[9]) +
                         "^FS" +
                         "^XZ";
 
         String tmpFine7 =
-                "^XA" +
-                        "^MMT^PW561^LL0120^LS0" +
-                        "^FO25,50^A0I,23,24^FH" +
-                        "^FB500,3,,J," +
-                        "^FD" + GreekConverter("Ο ΠΑΡΑΒΑΤΗΣ         Ο ΒΕΒΑΙΩΣΑΣ ΤΗΝ ΠΑΡΑΒΑΣΗ") +
-                        "^FS" +
-                        "^XZ";
-
-        String tmpFine8 =
                 "^XA" +
                         "^MMT^PW561^LL0480^LS0" +
                         "^FO512,320^GFA,00512,00512,00008,:Z64:eJxjYKA1kOF+AKHlP4BpG3sILVMjAFFgAVVYA6XtGyC0PJTmb0CVh6m3geq3fwBVDzGXgXkBFVw9UgAAIdQKuA==:BFA3" +
@@ -864,7 +809,7 @@ public class CleanlinessFineActivity extends AppCompatActivity implements Locati
                         "^FO400,300^GB27,27,1^FS" +
                         "^PQ1,0,1,Y^XZ";
 
-        String tmpFine9 =
+        String tmpFine8 =
                 "^XA" +
                         "^MMT^PW561^LL0583^LS0" +
                         "^FO128,160^GFA,03584,03584,00056,:Z64:eJztkzGK3DAUhp9R4KUI1gUG6xBpVAh7jzSQRgGx0uBiyjnCXiOlhilS5goKW2wZTbUqjJUnacw2gVzAf2eZn0//+58Adu3atWvXrn+I5Xs0dlX40r2HY5cXLTgoKzze/PfIBXrMQTwpdBbAMA8KY/OFIIvvAq9BQ0665yDJx2avY98zRz4byJc9yOLjy4MXjF3I193jEfJiOAfTeDqKofCuOSo85Vh5Riztor+DBKnw7ELSAEmTTzIJhaf7gTlgp5AUziHSuQM5fqk+vEbT0fn5FMwRukj5DgoPUHh6oHwg5mDov0+VB+ZT9XEXZEf3n09eaWCB8vWy7ytPHigf9Myrch9d84FsAxVdMEi+89VPEdBTPmEGDpZ45kD54Bmbz/AFC6/5xi5IdMS7OZGITvkmKXHOxFOy5NPMjTQ3J6dEXzD56jPUmYApz29eRBBgM7fK4M98y2kylK+LjUdTXso9sfkUdcbdlN2b4wl6sCv/+kOy8zzn1OuSjyiq8nTNx5tvIB76KZ/eYTjSIfG+LQZ/IfGGY8lntnyxzvPQ8nHKx8o+/IGxzpPz1yTZpcyzjyXfuM0zlv7ogh/91X2AR394J95L6U/E2h979Nd4qvXHaD9BE2+Fti89D2nkl5l4PJR8uO1LqvnGz8XWbfvpnrttP6+LyJiJh0Hktp+UP0e72EyFP/aa9nNaq6+9B85d4isr/RWfY+U90Lyzm5JdaSDp4/0VnmHb+/MUuKs8X3lePJHPEqnw2vvbtWvXrv/oL8/KZp4=:4075" +
@@ -884,7 +829,7 @@ public class CleanlinessFineActivity extends AppCompatActivity implements Locati
                         "^FT555,128^A0I,20,19^FH^FD" + GreekConverter("Α) στα ταμεία του " + fb_Mun_PayName) + "^FS" +
                         "^PQ1,0,1,Y^XZ";
 
-        String tmpFine10 =
+        String tmpFine9 =
                 "^XA" +
                         "^MMT^PW561^LL0170^LS0" +
                         "^FO25,50^A0I,20,19^FH" +
@@ -893,7 +838,7 @@ public class CleanlinessFineActivity extends AppCompatActivity implements Locati
                         "^FS" +
                         "^XZ";
 
-        String tmpFine11 =
+        String tmpFine10 =
                 "^XA" +
                         "^MMT^PW561^LL0623^LS0" +
                         "^FO384,320^GFA,01536,01536,00024,:Z64:eJztkEFKAzEUht+bV+gbCHa6SyGQgB4gS0Gx48ZzKPQAA64KYpN200UPNdqF15gjVNw3RmfqQFtXInQx3/Ljz5+fB9Bx8tAvHv/iibgyNzJ1y+qKzXlovd7YmRx6/R6EfWz9XFiDy8wLu2BjkrZVZRmu7FoNvSjuCfq7BywNrswrj77yBAPXeCWt7hV3auSVLQh0WfuE2Zwl+QWz/+4fNB5F7O/nE5FNhX0Iu3zcbw2Ru2Rb72/64/6PMCMn9eZWjKufPTRP19trdDItPY+rdn/9iZMAL3B4a8cAi0OPpUJ4izrs5UsB7jn67Z7Pe+ie4BjojuqOjv/nE5uuNrI=:8594" +
@@ -909,7 +854,7 @@ public class CleanlinessFineActivity extends AppCompatActivity implements Locati
                         "^FO497,526^GB27,27,1^FS" +
                         "^PQ1,0,1,Y^XZ";
 
-        String fine = tmpFine1 + tmpFine2 + tmpFine3 + tmpFine4 + tmpFine5 + tmpFine6 + tmpFine7/* + tmpFine8 + tmpFine9 + tmpFine10 + tmpFine10*/;
+        String fine = tmpFine1 + tmpFine2  + tmpFine3 + tmpFine4 + tmpFine5 + tmpFine6 + tmpFine7 + tmpFine8 + tmpFine9 + tmpFine10;
         return fine;
     }
 

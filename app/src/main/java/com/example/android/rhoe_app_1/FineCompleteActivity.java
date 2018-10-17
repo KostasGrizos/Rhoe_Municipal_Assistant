@@ -208,7 +208,7 @@ public class FineCompleteActivity extends AppCompatActivity implements LocationL
             }
         });
 
-        fb_DataRef_FineTemp = FirebaseDatabase.getInstance().getReference("TempFine").child("Temp " + fb_User_userID);
+        fb_DataRef_FineTemp = FirebaseDatabase.getInstance().getReference("TempFine").child("TempVehicle " + fb_User_userID);
         if (!ConditionOCR) {
             fb_DataRef_FineTemp.addValueEventListener(new ValueEventListener() {
                 @Override
@@ -349,7 +349,7 @@ public class FineCompleteActivity extends AppCompatActivity implements LocationL
             @Override
             public void onClick(View view) {
                 getTimestampFull();
-                //getLocationButton();
+                getLocationButton();
             }
         });
 
@@ -465,7 +465,7 @@ public class FineCompleteActivity extends AppCompatActivity implements LocationL
 
             fb_User_MunicipalityIndex = RUInfo.getMunicipality();
             fb_User_MID = RUInfo.getMID();
-            fb_DataRef_Fine = FirebaseDatabase.getInstance().getReference("Fines").child(fb_User_MID);
+            fb_DataRef_Fine = FirebaseDatabase.getInstance().getReference("Fines").child(fb_User_MID).child("VehicleFines");
             fb_User_P1 = RUInfo.getMACAddress();
             fb_User_P2 = RUInfo.getPrinterFriendlyName();
             fb_User_OfficerName = RUInfo.getLname() + " " + RUInfo.getFname();
@@ -530,9 +530,9 @@ public class FineCompleteActivity extends AppCompatActivity implements LocationL
         //simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT+2"));
         Date = simpleDateFormat.format(calendar.getTime());
 
-        //simpleDateFirebaseFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss:SSSZ");
+        simpleDateFirebaseFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss:SSSZ");
         //simpleDateFirebaseFormat.setTimeZone(TimeZone.getTimeZone("GMT+2"));
-        //DateFirebase = simpleDateFirebaseFormat.format(calendar.getTime());
+        DateFirebase = simpleDateFirebaseFormat.format(calendar.getTime());
 
         simpleTimeFormat = new SimpleDateFormat("HH:mm");
         //simpleTimeFormat.setTimeZone(TimeZone.getTimeZone("GMT+2"));
@@ -622,7 +622,6 @@ public class FineCompleteActivity extends AppCompatActivity implements LocationL
                 D4.getText().toString(),
                 D5.getText().toString()};
         boolean conD = extraInfoChecker(5, D);
-
 
         if (allComplete.equals("1")) {
             if ((FineBasic[0].length() != 0) &&
@@ -802,7 +801,7 @@ public class FineCompleteActivity extends AppCompatActivity implements LocationL
                 double lng = Double.parseDouble(strings[0].split(",")[1]);
                 String response;
                 HttpDataHandler http = new HttpDataHandler();
-                String url = String.format("https://maps.googleapis.com/maps/api/geocode/json?latlng=%.4f,%.4f&sensor=false&language=en",lat,lng);
+                @SuppressLint("DefaultLocale") String url = String.format("https://maps.googleapis.com/maps/api/geocode/json?latlng=%.4f,%.4f&sensor=false&language=el",lat,lng);
                 response = http.GetHTTPData(url);
                 return response;
             }
@@ -816,6 +815,7 @@ public class FineCompleteActivity extends AppCompatActivity implements LocationL
                 JSONObject jsonObject = new JSONObject(s);
 
                 String address = ((JSONArray)jsonObject.get("results")).getJSONObject(0).get("formatted_address").toString();
+                Log.d("ADebugTag", "Value: " + address);
                 LocationEditText.setText(address);
                 latF = lat;
                 lonF = lng;
@@ -1608,7 +1608,7 @@ public class FineCompleteActivity extends AppCompatActivity implements LocationL
                 C7.setText(RInfo.getC7());
                 C8.setText(RInfo.getC8());
             }
-            if (dataSnapshot.hasChild("Fine C")) {
+            if (dataSnapshot.hasChild("Fine D")) {
                 RInfo.setD1(dataSnapshot.child("Fine D").getValue(RetrieveFineInfoFirebase.class).getD1());
                 RInfo.setD2(dataSnapshot.child("Fine D").getValue(RetrieveFineInfoFirebase.class).getD2());
                 RInfo.setD3(dataSnapshot.child("Fine D").getValue(RetrieveFineInfoFirebase.class).getD3());

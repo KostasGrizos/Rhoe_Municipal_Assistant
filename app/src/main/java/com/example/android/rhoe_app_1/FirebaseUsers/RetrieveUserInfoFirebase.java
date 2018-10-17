@@ -5,7 +5,7 @@ package com.example.android.rhoe_app_1.FirebaseUsers;
  */
 
 public class RetrieveUserInfoFirebase {
-    private String Type, Fname, Lname, SignatureNum, Municipality, MID, MACAddress, PrinterFriendlyName;
+    private String Type, Fname, Lname, SignatureNum, Municipality, MID, MACAddress, PrinterFriendlyName, CatPreference;
 
     public RetrieveUserInfoFirebase() {
 
@@ -73,6 +73,14 @@ public class RetrieveUserInfoFirebase {
 
     public void setPrinterFriendlyName(String printerFriendlyName) {
         PrinterFriendlyName = printerFriendlyName;
+    }
+
+    public String getCatPreference() {
+        return CatPreference;
+    }
+
+    public void setCatPreference(String catPreference) {
+        CatPreference = catPreference;
     }
 }
 

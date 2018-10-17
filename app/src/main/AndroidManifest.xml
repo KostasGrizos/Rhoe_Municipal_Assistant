@@ -41,9 +41,9 @@
             android:name="com.google.android.gms.vicion.DEPENDENCIES"
             android:value="ocr" />
 
-        <activity android:name="com.example.android.rhoe_app_1.DashboardActivity" />
         <activity android:name="com.example.android.rhoe_app_1.RegisterActivity" />
         <activity android:name="com.example.android.rhoe_app_1.FineListActivity" />
+        <activity android:name="com.example.android.rhoe_app_1.DashboardActivity" />
         <activity
             android:name="com.example.android.rhoe_app_1.FineEditActivity"
             android:label="@string/title_activity_fine_edit"
@@ -57,7 +57,10 @@
         <activity android:name="com.example.android.rhoe_app_1.FineCompleteActivity" />
         <!-- activity android:name="com.example.android.rhoe_app_1.ListAdapterActivity"></activity -->
         <activity android:name="com.example.android.rhoe_app_1.CarFinePhotoActivity" />
-        <activity android:name="com.example.android.rhoe_app_1.CleanlinessFineActivity"></activity>
+        <activity android:name="com.example.android.rhoe_app_1.CleanlinessFineActivity" />
+        <activity android:name="com.example.android.rhoe_app_1.SmokingFineActivity" />
+        <activity android:name="com.example.android.rhoe_app_1.CleanlinessFineListActivity" />
+        <activity android:name="com.example.android.rhoe_app_1.SmokingFineListActivity"></activity>
     </application>
 
 </manifest>
